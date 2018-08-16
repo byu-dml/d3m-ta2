@@ -15,38 +15,68 @@ class GrpcServerTestCase(unittest.TestCase):
 		channel = grpc.insecure_channel('localhost:50052')
 		self.stub = core_pb2_grpc.CoreStub(channel)
 
-	def parse_grpc_exception(self, exception):
-		exception_properties = json.loads(exception.debug_error_string())
-		grpc_message = exception_properties['grpc_message']
-		prefix = 'Exception calling application: '
-		message = grpc_message[len(prefix):]
-		return message
+#------------------------------- Testing SearchSolutions ------------------------------------------------------------------------------------------------------------------
 
+	# tests that the proper error message is returned when the protocol version of the client does not match that of the server
+	def test_search_solutions_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
+			self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version='WRONG_VERSION')).result()
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'TA3 protocol version does not match TA2 protocol version'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
+
+	# tests that nothing goes wrong when calling SearchSolutions correctly and getting a response
 	def test_search_solutions_response(self):
+		# test a call to SearchSolutions
+		try:
+			response = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
+		except Exception as e:
+			self.fail('call to Searchsolutions failed to return a valid response')
+
+		# test that the response is an instance of SearchSolutionsResponse
+		self.assertIsInstance(response, core_pb2.SearchSolutionsResponse, 'call to SearchSolutions did not return an instance of SearchSolutionsResponse')
+
+	# tests that the search_id field is returned correctly
+	def test_search_solutions_response_search_id(self):
 		response_1 = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
-		response_2 = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
+		# test that the response actually has a search_id in it
+		if not hasattr(response_1, 'search_id'):
+			self.fail('SearchSolutionsResponse does not contain attribute \'search_id\'')
+
+		# test that the search id is >= 22 characters
 		search_id_1 = response_1.search_id
-		search_id_2 = response_2.search_id
 		if len(search_id_1) < 22:
-			raise ValueError('search_id returned in SearchSolutionsResponse is less than 22 characters')
+			self.fail(f'search_id \'{search_id_1}\' returned in SearchSolutionsResponse is either empty or less than 22 characters')	
+
+		# test that the method is not returning the same search_id each time it's called
+		response_2 = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
+		search_id_2 = response_2.search_id
 		self.assertNotEqual(search_id_1, search_id_2, f'Two consecutive calls to SearchSolutions produced the same search_id: {search_id_1}')
 
-		with self.assertRaises(Exception) as cm:
-			self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version='WRONG_VERSION')).result()
-		returned_message = self.parse_grpc_exception(cm.exception)
-		expected_error_message = 'TA3 protocol version does not match TA2 protocol version'
-		self.assertEqual(returned_message, expected_error_message, 'Did not recieve expected error message for mismatched protocol versions between TA2 and TA3')
+#------------------------------- Testing GetSearchSolutionsResults ------------------------------------------------------------------------------------------------------------------
 
-	def test_get_search_solutions_results_response(self):
-		with self.assertRaises(Exception) as cm:
+	# tests that the proper error message is returned when GetSearchSolutiosResults is called with an invalid search_id
+	def test_get_search_solutions_results_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
 			self.stub.GetSearchSolutionsResults(core_pb2.GetSearchSolutionsResultsRequest(search_id='WRONG_SEARCH_ID')).result()
-		returned_message = self.parse_grpc_exception(cm.exception)
-		expected_error_message = 'search_id provided in GetSearchSolutionsResultsRequest does not match any search_process'
-		self.assertEqual(returned_message, expected_error_message, 'Did not recieve expected error message for calling GetSearchSolutionsResults with invalid search_id')
-		
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
 
-
-
+	# tests that nothing goes wrong when calling GetSearchSolutionsResults correctly and getting a response stream
+	def test_get_search_solutions_results_response(self):
+		response = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
+		search_id = response.search_id
+		request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)
+		try:
+			for new_response in self.stub.GetSearchSolutionsResults(request):
+				# test that each response has a 'progress' field
+				if not hasattr(new_response, 'progress'):
+					self.fail('GetSearchSolutionsResultsResponse does not contain attribute \'progress\'')
+		except Exception as e:
+			self.fail('call to GetSearchSolutionsResults failed to return a valid response stream')
 
 if __name__ == '__main__':
 	test_cases = [GrpcServerTestCase]
