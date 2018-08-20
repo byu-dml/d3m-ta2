@@ -14,6 +14,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def __init__(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes = {}
+        self.solutions = {}
 
     def SearchSolutions(self, request, context):
         if request.version != self.protocol_version:
@@ -26,8 +27,60 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         if request.search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process')
         else:
+            # responses = self.search_processes[request.search_id].GetSearchSolutionsResults()
+            # for response in responses:
+            #     yield response
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
+
+    def EndSearchSolutions(self, request ,context):
+        if request.search_id not in self.search_processes:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process')
+        return core_pb2.EndSearchSolutionsResponse()
+
+    def StopSearchSolutions(self, request, context):
+        if request.search_id not in self.search_processes:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process')
+        return core_pb2.StopSearchSolutionsResponse()
+
+    def DescribeSolution(self, request, context):
+        if request.solution_id not in self.solutions:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id')
+        return core_pb2.DescribeSolutionResponse()
+
+    def ScoreSolution(self, request, context):
+        if request.solution_id not in self.solutions:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id')
+        return core_pb2.ScoreSolutionResponse()
+
+    def GetScoreSolutionResults(self, request, context):
+        yield core_pb2.GetScoreSolutionResultsResponse()
+
+    def FitSolution(self, request, context):
+        return core_pb2.FitSolutionResponse()
+
+    def GetFitSolutionResults(self, request, context):
+        yield core_pb2.GetFitSolutionResultsResponse()
+
+    def ProduceSolution(self, request, context):
+        return core_pb2.ProduceSolutionResponse()
+
+    def GetProduceSolutionResults(self, request, context):
+        yield core_pb2.GetProduceSolutionResultsResponse
+
+    def SolutionExport(self, request, context):
+        return core_pb2.SolutionExportResponse()
+
+    def UpdateProblem(self, request, context):
+        return core_pb2.UpdateProblemRequest()
+
+    def ListPrimitives(self, request, context):
+        return core_pb2.ListPrimitivesResponse()
+
+    def Hello(self, request, context):
+        return core_pb2.HelloResponse()
+
+
 
 
 

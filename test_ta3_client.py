@@ -56,7 +56,7 @@ class GrpcServerTestCase(unittest.TestCase):
 
 #------------------------------- Testing GetSearchSolutionsResults ------------------------------------------------------------------------------------------------------------------
 
-	# tests that the proper error message is returned when GetSearchSolutiosResults is called with an invalid search_id
+	# tests that the proper error message is returned when GetSearchSolutionsResults is called with an invalid search_id
 	def test_get_search_solutions_results_error(self):
 		with self.assertRaises(grpc.RpcError) as cm:
 			self.stub.GetSearchSolutionsResults(core_pb2.GetSearchSolutionsResultsRequest(search_id='WRONG_SEARCH_ID')).result()
@@ -77,6 +77,50 @@ class GrpcServerTestCase(unittest.TestCase):
 					self.fail('GetSearchSolutionsResultsResponse does not contain attribute \'progress\'')
 		except Exception as e:
 			self.fail('call to GetSearchSolutionsResults failed to return a valid response stream')
+
+#------------------------------- Testing EndSearchSolutions ------------------------------------------------------------------------------------------------------------------
+
+	# tests that the proper error message is returned when EndSearchSolutions is called with an invalid search_id
+	def test_end_search_solutions_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
+			self.stub.EndSearchSolutions(core_pb2.EndSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
+
+#------------------------------- Testing StopSearchSolutions ------------------------------------------------------------------------------------------------------------------
+
+	# tests that the proper error message is returned when StopSearchSolutions is called with an invalid search_id
+	def test_stop_search_solutions_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
+			self.stub.StopSearchSolutions(core_pb2.StopSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
+
+#------------------------------- Testing DescribeSolution ------------------------------------------------------------------------------------------------------------------
+
+	# tests that the proper error message is returned when DescribeSolution is called with an invalid solution_id
+	def test_describe_solution_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
+			self.stub.DescribeSolution(core_pb2.DescribeSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
+
+#------------------------------- Testing DescribeSolution ------------------------------------------------------------------------------------------------------------------
+
+	# tests that the proper error message is returned when ScoreSolution is called with an invalid solution_id
+	def test_score_solution_error(self):
+		with self.assertRaises(grpc.RpcError) as cm:
+			self.stub.ScoreSolution(core_pb2.ScoreSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
+		expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+		expected_error_message = 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id'
+		self.assertEqual(cm.exception.code(), expected_error_code)
+		self.assertEqual(cm.exception.details(), expected_error_message)
 
 if __name__ == '__main__':
 	test_cases = [GrpcServerTestCase]
