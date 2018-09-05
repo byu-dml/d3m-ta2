@@ -3,9 +3,9 @@ from __future__ import print_function
 import grpc
 import unittest
 import pytest
-
 import core_pb2
 import core_pb2_grpc
+import constants
 
 
 class GrpcServerTestCase(unittest.TestCase):
@@ -22,7 +22,7 @@ class GrpcServerTestCase(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as cm:
             self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version='WRONG_VERSION')).result()
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'TA3 protocol version does not match TA2 protocol version'
+        expected_error_message = constants.PROTOCOL_ERROR_MESSAGE
 
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
@@ -64,7 +64,7 @@ class GrpcServerTestCase(unittest.TestCase):
             self.stub.GetSearchSolutionsResults(
                 core_pb2.GetSearchSolutionsResultsRequest(search_id='WRONG_SEARCH_ID')).result()
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process'
+        expected_error_message = constants.SEARCH_ID_ERROR_MESSAGE
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
 

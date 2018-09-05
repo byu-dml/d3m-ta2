@@ -2,6 +2,7 @@ from concurrent import futures
 import time
 import uuid
 import grpc
+import constants
 
 import core_pb2
 import core_pb2_grpc
@@ -18,15 +19,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def SearchSolutions(self, request, context):
         if request.version != self.protocol_version:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'TA3 protocol version does not match TA2 protocol version')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.PROTOCOL_ERROR_MESSAGE)
         search_id = str(uuid.uuid4())
         self.search_processes[search_id] = SearchProcess(search_id, request)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
     def GetSearchSolutionsResults(self, request, context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT,
-                          'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
