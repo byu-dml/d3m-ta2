@@ -26,8 +26,6 @@ class GrpcServerTestCase(unittest.TestCase):
 
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
-        # self.assertEqual(cm.exception.code(), expected_error_code)
-        # self.assertEqual(cm.exception.details(), expected_error_message)
 
     # tests that nothing goes wrong when calling SearchSolutions correctly and getting a response
     def test_search_solutions_response(self):
@@ -40,8 +38,6 @@ class GrpcServerTestCase(unittest.TestCase):
 
         # test that the response is an instance of SearchSolutionsResponse
         assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions did not return an instance of SearchSolutionsResponse' 
-        # self.assertIsInstance(response, core_pb2.SearchSolutionsResponse,
-        #                       'call to SearchSolutions did not return an instance of SearchSolutionsResponse')
 
     # tests that the search_id field is returned correctly
     def test_search_solutions_response_search_id(self):
@@ -54,13 +50,11 @@ class GrpcServerTestCase(unittest.TestCase):
         search_id_1 = response_1.search_id
         if len(search_id_1) < 22:
             pytest.fail(f'search_id %s returned in SearchSolutionsResponse is either empty or less than 22 characters {search_id_1}')
-            # self.fail(f'search_id \'{search_id_1}\' returned in SearchSolutionsResponse is either empty or less than 22 characters')
 
         # test that the method is not returning the same search_id each time it's called
         response_2 = self.stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=self.protocol_version))
         search_id_2 = response_2.search_id
         assert search_id_1 != search_id_2, f'Two consecutive calls to SearchSolutions produced the same search_id: {search_id_1}'
-        # self.assertNotEqual(search_id_1, search_id_2, f'Two consecutive calls to SearchSolutions produced the same search_id: {search_id_1}')
 
     # ------------------------------- Testing GetSearchSolutionsResults ------------------------------------------------------------------------------------------------------------------
 
@@ -73,8 +67,6 @@ class GrpcServerTestCase(unittest.TestCase):
         expected_error_message = 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process'
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
-        # self.assertEqual(cm.exception.code(), expected_error_code)
-        # self.assertEqual(cm.exception.details(), expected_error_message)
 
     # tests that nothing goes wrong when calling GetSearchSolutionsResults correctly and getting a response stream
     def test_get_search_solutions_results_response(self):
