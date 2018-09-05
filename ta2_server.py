@@ -9,6 +9,7 @@ from search_process import SearchProcess
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
+
 class CoreSession(core_pb2_grpc.CoreServicer):
 
     def __init__(self):
@@ -24,11 +25,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def GetSearchSolutionsResults(self, request, context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT,
+                          'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process')
         else:
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
-
 
 
 def serve():
@@ -41,6 +42,7 @@ def serve():
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
         server.stop(0)
+
 
 if __name__ == '__main__':
     serve()
