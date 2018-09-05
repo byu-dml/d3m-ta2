@@ -89,8 +89,3 @@ class GrpcServerTestCase(unittest.TestCase):
         except Exception as e:
             pytest.fail(f'call to GetSearchSolutionsResults failed to return a valid response stream with exception {str(e)}')
 
-
-if __name__ == '__main__':
-    test_cases = [GrpcServerTestCase]
-    test_suite = unittest.TestSuite(map(unittest.TestLoader().loadTestsFromTestCase, test_cases))
-    unittest.TextTestRunner().run(test_suite)
