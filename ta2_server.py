@@ -4,8 +4,7 @@ import uuid
 import grpc
 import constants
 
-import core_pb2
-import core_pb2_grpc
+from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24

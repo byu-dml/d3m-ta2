@@ -3,8 +3,7 @@ from __future__ import print_function
 import grpc
 import unittest
 import pytest
-import core_pb2
-import core_pb2_grpc
+from generated_grpc import core_pb2_grpc, core_pb2
 import constants
 
 
