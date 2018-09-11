@@ -2,12 +2,13 @@ from concurrent import futures
 import time
 import uuid
 import grpc
+import constants
 
-import core_pb2
-import core_pb2_grpc
+from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+
 
 class CoreSession(core_pb2_grpc.CoreServicer):
 
@@ -18,14 +19,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def SearchSolutions(self, request, context):
         if request.version != self.protocol_version:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'TA3 protocol version does not match TA2 protocol version')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.PROTOCOL_ERROR_MESSAGE)
         search_id = str(uuid.uuid4())
         self.search_processes[search_id] = SearchProcess(search_id, request)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
     def GetSearchSolutionsResults(self, request, context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in GetSearchSolutionsResultsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
             # responses = self.search_processes[request.search_id].GetSearchSolutionsResults()
             # for response in responses:
@@ -35,22 +36,22 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def EndSearchSolutions(self, request ,context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.EndSearchSolutionsResponse()
 
     def StopSearchSolutions(self, request, context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.StopSearchSolutionsResponse()
 
     def DescribeSolution(self, request, context):
         if request.solution_id not in self.solutions:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.DESCRIBE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.DescribeSolutionResponse()
 
     def ScoreSolution(self, request, context):
         if request.solution_id not in self.solutions:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SCORE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.ScoreSolutionResponse()
 
     def GetScoreSolutionResults(self, request, context):
@@ -83,7 +84,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
 
 
-
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     core_pb2_grpc.add_CoreServicer_to_server(CoreSession(), server)
@@ -94,6 +94,7 @@ def serve():
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
         server.stop(0)
+
 
 if __name__ == '__main__':
     serve()
