@@ -80,3 +80,44 @@ class GrpcServerTestCase(unittest.TestCase):
         except Exception as e:
             pytest.fail(f'call to GetSearchSolutionsResults failed to return a valid response stream with exception {str(e)}')
 
+    # tests that the proper error message is returned when EndSearchSolutions is called with an invalid search_id
+    def test_end_search_solutions_error(self):
+        with self.assertRaises(grpc.RpcError) as cm:
+            self.stub.EndSearchSolutions(core_pb2.EndSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
+        expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+        expected_error_message = 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process'
+        self.assertEqual(cm.exception.code(), expected_error_code)
+        self.assertEqual(cm.exception.details(), expected_error_message)
+
+    # ------------------------------- Testing StopSearchSolutions ------------------------------------------------------------------------------------------------------------------
+
+    # tests that the proper error message is returned when StopSearchSolutions is called with an invalid search_id
+    def test_stop_search_solutions_error(self):
+        with self.assertRaises(grpc.RpcError) as cm:
+            self.stub.StopSearchSolutions(core_pb2.StopSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
+        expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+        expected_error_message = 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process'
+        self.assertEqual(cm.exception.code(), expected_error_code)
+        self.assertEqual(cm.exception.details(), expected_error_message)
+
+    # ------------------------------- Testing DescribeSolution ------------------------------------------------------------------------------------------------------------------
+
+    # tests that the proper error message is returned when DescribeSolution is called with an invalid solution_id
+    def test_describe_solution_error(self):
+        with self.assertRaises(grpc.RpcError) as cm:
+            self.stub.DescribeSolution(core_pb2.DescribeSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
+        expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+        expected_error_message = 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id'
+        self.assertEqual(cm.exception.code(), expected_error_code)
+        self.assertEqual(cm.exception.details(), expected_error_message)
+
+    # ------------------------------- Testing DescribeSolution ------------------------------------------------------------------------------------------------------------------
+
+    # tests that the proper error message is returned when ScoreSolution is called with an invalid solution_id
+    def test_score_solution_error(self):
+        with self.assertRaises(grpc.RpcError) as cm:
+            self.stub.ScoreSolution(core_pb2.ScoreSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
+        expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
+        expected_error_message = 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id'
+        self.assertEqual(cm.exception.code(), expected_error_code)
+        self.assertEqual(cm.exception.details(), expected_error_message)
