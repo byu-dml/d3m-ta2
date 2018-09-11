@@ -1,12 +1,13 @@
 from __future__ import print_function
 
 import pytest
-from generated_grpc import core_pb2
+from generated_grpc import core_pb2, core_pb2_grpc
 
 
 class TestTa3Client:
 
-    def test_search_solutions_response(self, stub, protocol_version):
+    @staticmethod
+    def test_search_solutions_response(stub: core_pb2_grpc.CoreStub, protocol_version: str):
         response = None
         try:
             response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version))
@@ -15,7 +16,8 @@ class TestTa3Client:
 
         assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions did not return an instance of SearchSolutionsResponse' 
 
-    def test_search_solutions_response_search_id(self, stub, protocol_version):
+    @staticmethod
+    def test_search_solutions_response_search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str):
         response_1 = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version))
         if not hasattr(response_1, 'search_id'):
             pytest.fail("SearchSolutionsResponse does not contain attribute 'search_id'")
@@ -28,7 +30,8 @@ class TestTa3Client:
         search_id_2 = response_2.search_id
         assert search_id_1 != search_id_2, f'Two consecutive calls to SearchSolutions produced the same search_id: {search_id_1}'
 
-    def test_get_search_solutions_results_response(self, stub, protocol_version):
+    @staticmethod
+    def test_get_search_solutions_results_response(stub: core_pb2_grpc.CoreStub, protocol_version: str):
         response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version))
         search_id = response.search_id
         request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)
