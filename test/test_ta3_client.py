@@ -4,10 +4,6 @@ import pytest
 from generated_grpc import core_pb2
 
 
-# protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
-# stub = core_pb2_grpc.CoreStub(channel)
-
-
 class TestTa3Client:
 
     def test_search_solutions_response(self, stub, protocol_version):
