@@ -73,7 +73,7 @@ class GrpcServerTestCase(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as cm:
             self.stub.EndSearchSolutions(core_pb2.EndSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process'
+        expected_error_message = constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
 
@@ -83,7 +83,7 @@ class GrpcServerTestCase(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as cm:
             self.stub.StopSearchSolutions(core_pb2.StopSearchSolutionsRequest(search_id='WRONG_SEARCH_ID'))
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process'
+        expected_error_message = constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
 
@@ -93,7 +93,7 @@ class GrpcServerTestCase(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as cm:
             self.stub.DescribeSolution(core_pb2.DescribeSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id'
+        expected_error_message = constants.DESCRIBE_SOLUTION_ERROR_MESSAGE
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message
 
@@ -103,6 +103,6 @@ class GrpcServerTestCase(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as cm:
             self.stub.ScoreSolution(core_pb2.ScoreSolutionRequest(solution_id='WRONG_SOLUTION_ID'))
         expected_error_code = grpc.StatusCode.INVALID_ARGUMENT
-        expected_error_message = 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id'
+        expected_error_message = constants.SCORE_SOLUTION_ERROR_MESSAGE
         assert cm.exception.code() == expected_error_code
         assert cm.exception.details() == expected_error_message

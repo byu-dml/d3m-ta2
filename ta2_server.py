@@ -36,22 +36,22 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def EndSearchSolutions(self, request ,context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.EndSearchSolutionsResponse()
 
     def StopSearchSolutions(self, request, context):
         if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.StopSearchSolutionsResponse()
 
     def DescribeSolution(self, request, context):
         if request.solution_id not in self.solutions:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in DescribeSolutionRequest does not match any solution_id')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.DESCRIBE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.DescribeSolutionResponse()
 
     def ScoreSolution(self, request, context):
         if request.solution_id not in self.solutions:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id')
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SCORE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.ScoreSolutionResponse()
 
     def GetScoreSolutionResults(self, request, context):
