@@ -1,10 +1,7 @@
-from __future__ import print_function
-
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc
 
-
-class TestTa3Client:
+class TestSearchSolutions:
 
     @staticmethod
     def test_search_solutions_response(stub: core_pb2_grpc.CoreStub, protocol_version: str):
@@ -14,7 +11,7 @@ class TestTa3Client:
         except Exception as e:
             pytest.fail(f'call to SearchSolutions failed to return a valid response with exception {str(e)}')
 
-        assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions did not return an instance of SearchSolutionsResponse' 
+        assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions did not return an instance of SearchSolutionsResponse'
 
     @staticmethod
     def test_search_solutions_response_search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str):
@@ -42,3 +39,6 @@ class TestTa3Client:
         except Exception as e:
             pytest.fail(f'call to GetSearchSolutionsResults failed to return a valid response stream with exception {str(e)}')
 
+    @staticmethod
+    def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str):
+        pass
