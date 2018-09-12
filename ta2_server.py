@@ -82,8 +82,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return core_pb2.HelloResponse()
 
 
-
-
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     core_pb2_grpc.add_CoreServicer_to_server(CoreSession(), server)
