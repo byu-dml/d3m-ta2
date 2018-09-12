@@ -1,6 +1,7 @@
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc
 
+
 class TestSearchSolutions:
 
     @staticmethod

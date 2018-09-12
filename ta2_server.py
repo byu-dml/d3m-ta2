@@ -34,7 +34,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
 
-    def EndSearchSolutions(self, request ,context):
+    def EndSearchSolutions(self, request, context):
         if request.search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.EndSearchSolutionsResponse()
