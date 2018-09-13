@@ -48,26 +48,37 @@ class TestSearchSolutions:
     @staticmethod
     def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline: pipeline_module.Pipeline):
         pipeline_description: pipeline_pb2.PipelineDescription = TestSearchSolutions.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
+        # pprint(pipeline_description)
         assert False
         # pipeline_description.
 
     @staticmethod
-    def python_pipeline_to_protocol_pipeline(python_pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
-        created_datetime: datetime.datetime = python_pipeline.created
+    def python_pipeline_to_protocol_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
+        created_datetime: datetime.datetime = pipeline.created
         created = TestSearchSolutions.get_protobuf_timestamp(created_datetime)
-        name = python_pipeline.name
-        description = python_pipeline.description
+        name = pipeline.name
+        description = pipeline.description
         inputs: typing.List[dict] = []
-        pprint(python_pipeline.inputs)
-        for input in python_pipeline.inputs:
+        for input in pipeline.inputs:
             input_name = input['name']
-            inputs.append(pipeline_pb2.PipelineDescriptionInput(name=input_name))
+            description_input = pipeline_pb2.PipelineDescriptionInput(name=input_name)
+            inputs.append(description_input)
         outputs = []
-        for output in python_pipeline.outputs:
-            outputs.append(pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data']))
+        for output in pipeline.outputs:
+            description_output = pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data'])
+            outputs.append(description_output)
 
-        return pipeline_pb2.PipelineDescription(created=created, name=name, description=description, inputs=inputs, outputs=outputs)
-        #steps = []
+        # pprint(pipeline.steps)
+        steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = []
+        for step in pipeline.steps:
+            if isinstance(step, pipeline_module.PrimitiveStep):
+                pprint(dir(step.primitive))
+                description_step = pipeline_pb2.PipelineDescriptionStep()
+                description_step.step = pipeline_pb2.PrimitivePipelineDescriptionStep()
+                steps.append(step)
+
+        pprint(steps)
+        return pipeline_pb2.PipelineDescription(created=created, name=name, description=description, inputs=inputs, outputs=outputs, steps=steps)
         # assuming each step is a primitive for now, this should be changed
         #for step in python_pipeline.steps:
 
