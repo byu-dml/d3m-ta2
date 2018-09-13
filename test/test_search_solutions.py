@@ -1,6 +1,10 @@
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2, primitive_pb2
 from d3m.metadata import pipeline as pipeline_module
+from pprint import pprint
+import typing
+import datetime
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
 class TestSearchSolutions:
@@ -43,16 +47,21 @@ class TestSearchSolutions:
 
     @staticmethod
     def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline: pipeline_module.Pipeline):
-        pipeline_description = TestSearchSolutions.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
+        pipeline_description: pipeline_pb2.PipelineDescription = TestSearchSolutions.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
+        assert False
+        # pipeline_description.
 
     @staticmethod
-    def python_pipeline_to_protocol_pipeline(python_pipeline: pipeline_module.Pipeline):
-        created = python_pipeline.created
+    def python_pipeline_to_protocol_pipeline(python_pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
+        created_datetime: datetime.datetime = python_pipeline.created
+        created = TestSearchSolutions.get_protobuf_timestamp(created_datetime)
         name = python_pipeline.name
         description = python_pipeline.description
-        inputs = []
+        inputs: typing.List[dict] = []
+        pprint(python_pipeline.inputs)
         for input in python_pipeline.inputs:
-            inputs.append(pipeline_pb2.PipelineDescriptionInput(name=input))
+            input_name = input['name']
+            inputs.append(pipeline_pb2.PipelineDescriptionInput(name=input_name))
         outputs = []
         for output in python_pipeline.outputs:
             outputs.append(pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data']))
@@ -61,5 +70,12 @@ class TestSearchSolutions:
         #steps = []
         # assuming each step is a primitive for now, this should be changed
         #for step in python_pipeline.steps:
+
+    @staticmethod
+    def get_protobuf_timestamp(created_datetime):
+        created_datetime = created_datetime.replace(tzinfo=None)
+        created: Timestamp = Timestamp()
+        created.FromDatetime(created_datetime)
+        return created
 
 

@@ -22,5 +22,5 @@ def protocol_version() -> str:
 
 @pytest.fixture()
 def random_forest_pipeline() -> pipeline_module.Pipeline:
-    pipeline_path = '../pipelines/random_forest_classification.yml'
+    pipeline_path = 'test/pipelines/random_forest_classification.yml'
     return runtime.get_pipeline(pipeline_path)
