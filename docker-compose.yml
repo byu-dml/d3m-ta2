@@ -1,0 +1,12 @@
+version: '2.4'
+services:
+  d3m:
+    build: .
+    container_name: ta2
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+    volumes:
+      - ${VOLUMES}:/volumes
+      - ${DATASETS}:/datasets
+      - ${TA2}:/d3m-ta2
