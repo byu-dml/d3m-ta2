@@ -1,5 +1,6 @@
 import pytest
-from generated_grpc import core_pb2, core_pb2_grpc
+from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2, primitive_pb2
+from d3m.metadata import pipeline as pipeline_module
 
 
 class TestSearchSolutions:
@@ -41,5 +42,24 @@ class TestSearchSolutions:
             pytest.fail(f'call to GetSearchSolutionsResults failed to return a valid response stream with exception {str(e)}')
 
     @staticmethod
-    def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str):
-        pass
+    def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline: pipeline_module.Pipeline):
+        pipeline_description = TestSearchSolutions.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
+
+    @staticmethod
+    def python_pipeline_to_protocol_pipeline(python_pipeline: pipeline_module.Pipeline):
+        created = python_pipeline.created
+        name = python_pipeline.name
+        description = python_pipeline.description
+        inputs = []
+        for input in python_pipeline.inputs:
+            inputs.append(pipeline_pb2.PipelineDescriptionInput(name=input))
+        outputs = []
+        for output in python_pipeline.outputs:
+            outputs.append(pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data']))
+
+        return pipeline_pb2.PipelineDescription(created=created, name=name, description=description, inputs=inputs, outputs=outputs)
+        #steps = []
+        # assuming each step is a primitive for now, this should be changed
+        #for step in python_pipeline.steps:
+
+
