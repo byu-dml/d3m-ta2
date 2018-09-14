@@ -58,7 +58,7 @@ class TestSearchSolutions:
 
         pipeline_inputs: typing.List[dict] = TestSearchSolutions.get_pipeline_inputs(pipeline)
         pipeline_outputs = TestSearchSolutions.get_pipeline_outputs(pipeline)
-        pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = TestSearchSolutions.get_steps(pipeline)
+        pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = TestSearchSolutions.get_pipeline_steps(pipeline)
         created = TestSearchSolutions.get_protobuf_timestamp(pipeline)
 
         pipeline_name = pipeline.name
@@ -91,7 +91,7 @@ class TestSearchSolutions:
         return pipeline_description_inputs
 
     @staticmethod
-    def get_steps(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionStep]:
+    def get_pipeline_steps(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionStep]:
         steps = []
         for step in pipeline.steps:
             if isinstance(step, pipeline_module.PrimitiveStep):
