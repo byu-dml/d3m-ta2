@@ -20,7 +20,7 @@ steps:
       version: 0.2.0
       python_path: d3m.primitives.datasets.Denormalize
       name: Denormalize datasets
-      digest: bce367e3fe15357e1c02244a2dad94d458e06b14fb571bb50da6b6a4a9f623b9
+      digest: 6dc9c464faa161e3611859b33877307fbe6082e7bca7463a6f3cac6e2834a136
     arguments:
       inputs:
         type: CONTAINER
@@ -34,7 +34,7 @@ steps:
       version: 0.3.0
       python_path: d3m.primitives.datasets.DatasetToDataFrame
       name: Extract a DataFrame from a Dataset
-      digest: bce367e3fe15357e1c02244a2dad94d458e06b14fb571bb50da6b6a4a9f623b9
+      digest: 6dc9c464faa161e3611859b33877307fbe6082e7bca7463a6f3cac6e2834a136
     arguments:
       inputs:
         type: CONTAINER
@@ -48,7 +48,7 @@ steps:
       version: 0.4.0
       python_path: d3m.primitives.data.ColumnParser
       name: Parses strings into their types
-      digest: bce367e3fe15357e1c02244a2dad94d458e06b14fb571bb50da6b6a4a9f623b9
+      digest: 6dc9c464faa161e3611859b33877307fbe6082e7bca7463a6f3cac6e2834a136
     arguments:
       inputs:
         type: CONTAINER
@@ -101,7 +101,7 @@ steps:
       version: 0.3.0
       python_path: d3m.primitives.data.ConstructPredictions
       name: Construct pipeline predictions output
-      digest: bce367e3fe15357e1c02244a2dad94d458e06b14fb571bb50da6b6a4a9f623b9
+      digest: 6dc9c464faa161e3611859b33877307fbe6082e7bca7463a6f3cac6e2834a136
     arguments:
       inputs:
         type: CONTAINER
