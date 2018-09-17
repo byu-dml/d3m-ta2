@@ -7,6 +7,8 @@ import typing
 import datetime
 from google.protobuf.timestamp_pb2 import Timestamp
 
+from wrapper.primitive import Primitive
+
 
 class TestSearchSolutions:
 
@@ -96,7 +98,7 @@ class TestSearchSolutions:
         for step in pipeline.steps:
             if isinstance(step, pipeline_module.PrimitiveStep):
                 primitive_description = step.primitive_description
-                primitive = TestSearchSolutions.get_primitive_from_description(primitive_description)
+                primitive = Primitive.get_primitive_from_description(primitive_description)
                 arguments = step.arguments
                 primitive_step_arguments = TestSearchSolutions.get_primitive_step_arguments(arguments)
 
@@ -127,19 +129,6 @@ class TestSearchSolutions:
             primitive_step_arguments[key] = primitive_step_argument
 
         return primitive_step_arguments
-
-    @staticmethod
-    def get_primitive_from_description(primitive_description: dict) -> pipeline_pb2.primitive__pb2.Primitive:
-        id_ = primitive_description['id']
-        version = primitive_description['version']
-        python_path = primitive_description['python_path']
-        name = primitive_description['name']
-        digest = None
-        if 'digest' in primitive_description:
-            digest = primitive_description['digest']
-
-        primitive = pipeline_pb2.primitive__pb2.Primitive(id=id_, version=version, python_path=python_path, name=name, digest=digest)
-        return primitive
 
     @staticmethod
     def get_protobuf_timestamp(pipeline: pipeline_module.Pipeline) -> Timestamp:
