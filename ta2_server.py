@@ -6,7 +6,8 @@ import constants
 
 from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
-
+from config import Config
+from pprint import pprint
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
@@ -85,7 +86,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     core_pb2_grpc.add_CoreServicer_to_server(CoreSession(), server)
-    server.add_insecure_port('[::]:50052')
+    server.add_insecure_port('[::]:' + Config.server_port)
     server.start()
     try:
         while True:

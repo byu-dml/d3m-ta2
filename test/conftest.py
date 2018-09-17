@@ -3,11 +3,12 @@ import grpc
 from generated_grpc import core_pb2_grpc, core_pb2
 from d3m import runtime
 from d3m.metadata import pipeline as pipeline_module
+from config import Config
 
 
 @pytest.fixture(scope='module')
 def grpc_channel() -> grpc.Channel:
-    return grpc.insecure_channel('localhost:50052')
+    return grpc.insecure_channel(Config.server_host + ':' + Config.server_port)
 
 
 @pytest.fixture(scope='module')

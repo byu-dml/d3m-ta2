@@ -1,4 +1,4 @@
-version: '2.4'
+version: '3'
 services:
   d3m:
     build: .
@@ -10,3 +10,8 @@ services:
       - ${VOLUMES}:/volumes
       - ${DATASETS}:/datasets
       - ${TA2}:/d3m-ta2
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+#    network_mode: "host"
+      
+
