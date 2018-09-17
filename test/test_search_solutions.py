@@ -1,13 +1,7 @@
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2, primitive_pb2
 from d3m.metadata import pipeline as pipeline_module
-import d3m.container as container
-from pprint import pprint
-import typing
-import datetime
-from google.protobuf.timestamp_pb2 import Timestamp
-
-from wrapper.primitive import Primitive
+from wrapper.pipeline_description import PipelineDescription
 
 
 class TestSearchSolutions:
@@ -50,92 +44,8 @@ class TestSearchSolutions:
 
     @staticmethod
     def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline: pipeline_module.Pipeline):
-        pipeline_description: pipeline_pb2.PipelineDescription = TestSearchSolutions.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
+        pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescription.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
         # pprint(pipeline_description)
         assert False
         # pipeline_description.
-
-    @staticmethod
-    def python_pipeline_to_protocol_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
-
-        pipeline_inputs: typing.List[dict] = TestSearchSolutions.get_pipeline_inputs(pipeline)
-        pipeline_outputs = TestSearchSolutions.get_pipeline_outputs(pipeline)
-        pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = TestSearchSolutions.get_pipeline_steps(pipeline)
-        created = TestSearchSolutions.get_protobuf_timestamp(pipeline)
-
-        pipeline_name = pipeline.name
-        pipeline_description = pipeline.description
-
-        return pipeline_pb2.PipelineDescription(created=created,
-                                                name=pipeline_name,
-                                                description=pipeline_description,
-                                                inputs=pipeline_inputs,
-                                                outputs=pipeline_outputs,
-                                                steps=pipeline_steps
-                                                )
-
-    @staticmethod
-    def get_pipeline_outputs(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionOutput]:
-        outputs = []
-        for output in pipeline.outputs:
-            description_output = pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data'])
-            outputs.append(description_output)
-        return outputs
-
-    @staticmethod
-    def get_pipeline_inputs(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionInput]:
-        pipeline_description_inputs = []
-        for input_ in pipeline.inputs:
-            input_name = input_['name']
-            description_input = pipeline_pb2.PipelineDescriptionInput(name=input_name)
-            pipeline_description_inputs.append(description_input)
-
-        return pipeline_description_inputs
-
-    @staticmethod
-    def get_pipeline_steps(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionStep]:
-        steps = []
-        for step in pipeline.steps:
-            if isinstance(step, pipeline_module.PrimitiveStep):
-                primitive_description = step.primitive_description
-                primitive = Primitive.get_primitive_from_description(primitive_description)
-                arguments = step.arguments
-                primitive_step_arguments = TestSearchSolutions.get_primitive_step_arguments(arguments)
-
-                primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
-                                                                                           arguments=primitive_step_arguments)
-
-                pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_description_step)
-                steps.append(pipeline_description_step)
-        return steps
-
-    @staticmethod
-    def get_primitive_step_arguments(arguments: dict) -> typing.Dict[str, pipeline_pb2.PrimitiveStepArgument]:
-        primitive_step_arguments = {}
-        for key, argument in arguments.items():
-            data = argument['data']
-            type_ = argument['type']
-
-            primitive_step_argument = None
-            if type_ == pipeline_module.ArgumentType.CONTAINER:
-                container_argument = pipeline_pb2.ContainerArgument(data=data)
-                primitive_step_argument = pipeline_pb2.PrimitiveStepArgument(container=container_argument)
-            elif type_ == pipeline_module.ArgumentType.DATA:
-                data_argument = pipeline_pb2.DataArgument(date=data)
-                primitive_step_argument = pipeline_pb2.PrimitiveStepArgument(data=data_argument)
-            else:
-                pytest.fail(f"Invalid type for argument {argument}")
-
-            primitive_step_arguments[key] = primitive_step_argument
-
-        return primitive_step_arguments
-
-    @staticmethod
-    def get_protobuf_timestamp(pipeline: pipeline_module.Pipeline) -> Timestamp:
-        created_datetime: datetime.datetime = pipeline.created
-        created_datetime = created_datetime.replace(tzinfo=None)
-        created: Timestamp = Timestamp()
-        created.FromDatetime(created_datetime)
-        return created
-
 
