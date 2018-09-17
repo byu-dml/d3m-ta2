@@ -10,23 +10,36 @@ class PipelineDescription:
 
     @staticmethod
     def python_pipeline_to_protocol_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
+        pipeline_id = pipeline.id
+        pipeline_created = PipelineDescription.get_protobuf_timestamp(pipeline)
+        pipeline_context = PipelineDescription.pipeline_context_enum_to_proto_pipeline_context_enum(pipeline.context)
+        pipeline_name = pipeline.name
+        pipeline_description = pipeline.description
 
         pipeline_inputs: typing.List[dict] = PipelineDescription.get_pipeline_inputs(pipeline)
         pipeline_outputs = PipelineDescription.get_pipeline_outputs(pipeline)
         pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = PipelineDescription.get_pipeline_steps(
             pipeline)
-        created = PipelineDescription.get_protobuf_timestamp(pipeline)
 
-        pipeline_name = pipeline.name
-        pipeline_description = pipeline.description
-
-        return pipeline_pb2.PipelineDescription(created=created,
+        return pipeline_pb2.PipelineDescription(id=pipeline_id,
+                                                created=pipeline_created,
+                                                context=pipeline_context,
                                                 name=pipeline_name,
                                                 description=pipeline_description,
                                                 inputs=pipeline_inputs,
                                                 outputs=pipeline_outputs,
                                                 steps=pipeline_steps
                                                 )
+
+    @staticmethod
+    def pipeline_context_enum_to_proto_pipeline_context_enum(context: pipeline_module.PipelineContext) -> int:
+        switcher = {
+            pipeline_module.PipelineContext.PRETRAINING: pipeline_pb2.PRETRAINING,
+            pipeline_module.PipelineContext.TESTING: pipeline_pb2.TESTING,
+            pipeline_module.PipelineContext.EVALUATION: pipeline_pb2.EVALUATION,
+            pipeline_module.PipelineContext.PRODUCTION: pipeline_pb2.PRODUCTION
+        }
+        return switcher.get(context, pipeline_pb2.PIPELINE_CONTEXT_UNKNOWN)
 
     @staticmethod
     def get_pipeline_outputs(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionOutput]:

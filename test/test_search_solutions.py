@@ -47,5 +47,5 @@ class TestSearchSolutions:
         pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescription.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
         # pprint(pipeline_description)
         assert False
-        # pipeline_description.
+        # pipeline_description.j
 
