@@ -9,7 +9,7 @@ import datetime
 class PipelineDescription:
 
     @staticmethod
-    def python_pipeline_to_protocol_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
+    def pipeline_to_protobuf_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
         pipeline_id = pipeline.id
         pipeline_created = PipelineDescription.get_protobuf_timestamp(pipeline)
         pipeline_context = PipelineDescription.pipeline_context_enum_to_proto_pipeline_context_enum(pipeline.context)
@@ -105,3 +105,35 @@ class PipelineDescription:
         created: Timestamp = Timestamp()
         created.FromDatetime(created_datetime)
         return created
+
+    @staticmethod
+    def get_pipeline_from_protobuf_pipeline(protobuf_pipeline: pipeline_pb2.PipelineDescription) -> pipeline_module.Pipeline:
+        id = protobuf_pipeline.id
+        context = PipelineDescription.proto_pipeline_context_enum_to_pipeline_context_enum(protobuf_pipeline.context)
+        # created
+        name = protobuf_pipeline.name
+        description = protobuf_pipeline.description
+
+        pipeline = pipeline_module.Pipeline(pipeline_id=id, context=context, name=name, description=description)
+
+        for input in protobuf_pipeline.inputs:
+            pipeline.add_input(input.name)
+
+        # for protobuf_step in protobuf_pipeline.steps:
+        #
+        # for output in protobuf_pipeline.outputs:
+        #     pipeline.add_output(output.data, output.name)
+
+        return pipeline
+
+    @staticmethod
+    def proto_pipeline_context_enum_to_pipeline_context_enum(context: pipeline_pb2.PipelineContext) -> pipeline_module.PipelineContext:
+        switcher = {
+            1: pipeline_module.PipelineContext.PRETRAINING,
+            2: pipeline_module.PipelineContext.TESTING,
+            3: pipeline_module.PipelineContext.EVALUATION,
+            4: pipeline_module.PipelineContext.PRODUCTION
+        }
+        return switcher.get(context, 0)
+
+

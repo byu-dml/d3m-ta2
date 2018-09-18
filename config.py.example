@@ -2,5 +2,5 @@
 
 class Config:
     server_host = 'localhost'
-    server_port = 50052
+    server_port = '50052'
     

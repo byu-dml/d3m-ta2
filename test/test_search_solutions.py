@@ -44,8 +44,6 @@ class TestSearchSolutions:
 
     @staticmethod
     def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline: pipeline_module.Pipeline):
-        pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescription.python_pipeline_to_protocol_pipeline(random_forest_pipeline)
-        # pprint(pipeline_description)
-        assert False
-        # pipeline_description.j
-
+        pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescription.pipeline_to_protobuf_pipeline(random_forest_pipeline)
+        response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version, template=pipeline_description))
+        assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions with fully specified pipeline did not return an instance of SearchSolutionsResponse'

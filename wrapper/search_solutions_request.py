@@ -8,10 +8,9 @@ class SearchSolutionsRequest:
     
     @staticmethod
     def get_from_protobuf(req: core.SearchSolutionsRequest):
-        pipeline_description_protobuf = req.pipeline_description
         search_solutions_request = SearchSolutionsRequest(req)
-        search_solutions_request.pipeline_description = PipelineDescription.get_from_protobuf(pipeline_description_protobuf)
-        
+        pipeline_description_protobuf = search_solutions_request.protobuf_search_solutions_request.template
+        search_solutions_request.pipeline_description = PipelineDescription.get_pipeline_from_protobuf_pipeline(pipeline_description_protobuf)
         return search_solutions_request
         
         
