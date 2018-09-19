@@ -4,13 +4,14 @@ import grpc
 import unittest
 from generated_grpc import core_pb2_grpc, core_pb2
 import constants
+from config import Config
 
 
 class TestIncorrectParams(unittest.TestCase):
 
     def setUp(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
-        channel = grpc.insecure_channel('localhost:50052')
+        channel = grpc.insecure_channel(Config.server_host + ':' + Config.server_port)
         self.stub = core_pb2_grpc.CoreStub(channel)
 
     def test_search_solutions_error(self):

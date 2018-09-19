@@ -7,7 +7,8 @@ import constants
 from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
 from config import Config
-from wrapper.search_solutions_request import SearchSolutionsRequest
+import wrapper.search_solutions_request as search_solutions_wrapper
+from pprint import pprint
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
@@ -18,10 +19,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_processes = {}
         self.solutions = {}
 
-    def SearchSolutions(self, request, context):
+    def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
         if request.version != self.protocol_version:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.PROTOCOL_ERROR_MESSAGE)
-        search_solutions_request = SearchSolutionsRequest.get_from_protobuf(request)
+
+        problem = request.problem.problem
+        if not hasattr(problem, 'id') or problem.id == '':
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
+        search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
         self.search_processes[search_id] = SearchProcess(search_id, search_solutions_request)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
