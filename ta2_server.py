@@ -8,8 +8,10 @@ from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
 from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
-from pprint import pprint
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+_ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
+_TA2_VERSION = '1.0'
+_USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
 
 
 class CoreSession(core_pb2_grpc.CoreServicer):
@@ -86,7 +88,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return core_pb2.ListPrimitivesResponse()
 
     def Hello(self, request, context):
-        return core_pb2.HelloResponse()
+        return core_pb2.HelloResponse(version=_TA2_VERSION,
+                                      user_agent=_USER_AGENT,
+                                      allowed_value_types=_ALLOWED_VALUE_TYPES,
+                                      supported_extensions=[]
+                                      )
 
 
 def serve():
