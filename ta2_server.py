@@ -6,6 +6,10 @@ import constants
 import typing
 import d3m.index as index
 import d3m.primitive_interfaces.base as base
+import d3m.metadata.problem as problem_metadata
+import sys
+import logging
+import queue
 
 from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from search_process import SearchProcess
@@ -26,6 +30,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def __init__(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
+        self.work_queue = queue.PriorityQueue()
+
+    def insert_into_queue(self, priority, search_process):
+        logging.info(f'Inserting {search_process} into queue')
+        self.work_queue.put((priority, search_process))
 
     def find_search_solution(self, solution_id: str):
         for search_process in self.search_processes:
@@ -35,6 +44,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return None
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
+        logging.debug(f'Received SearchSolutionsRequest {request}')
         if request.version != self.protocol_version:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.PROTOCOL_ERROR_MESSAGE)
 
@@ -43,7 +53,10 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
-        self.search_processes[search_id] = SearchProcess(search_id, search_solutions_request)
+        priority = search_solutions_request.priority
+        search_process = SearchProcess(search_id, search_solutions_request, priority)
+        self.search_processes[search_id] = search_process
+        self.insert_into_queue(priority, search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
     def GetSearchSolutionsResults(self, request, context):
@@ -126,6 +139,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
 
 def serve():
+    root = logging.getLogger()
+    root.setLevel(Config.log_level)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler(sys.stderr)
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+    
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=_NUM_SERVER_THREADS))
     core_pb2_grpc.add_CoreServicer_to_server(CoreSession(), server)
     server.add_insecure_port('[::]:' + Config.server_port)
