@@ -26,7 +26,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def __init__(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
-        
+
     def find_search_solution(self, solution_id: str):
         for search_process in self.search_processes:
             if solution_id in search_process.solutions:
@@ -114,7 +114,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             metadata = primitive_base.metadata.to_json_structure()
             primitive = Primitive.get_primitive_from_json(metadata)
             primitives.append(primitive)
-                
+    
         return core_pb2.ListPrimitivesResponse(primitives=primitives)
 
     def Hello(self, request: core_pb2.HelloRequest, context):
