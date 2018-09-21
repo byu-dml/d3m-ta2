@@ -25,8 +25,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def __init__(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
-        self.search_processes = {}
-        self.solutions = {}
+        self.search_processes: typing.Dict[str, SearchProcess] = {}
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
         if request.version != self.protocol_version:
