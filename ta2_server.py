@@ -7,7 +7,7 @@ import typing
 import d3m.index as index
 import d3m.primitive_interfaces.base as base
 
-from generated_grpc import core_pb2_grpc, core_pb2
+from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from search_process import SearchProcess
 from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
@@ -26,6 +26,13 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def __init__(self):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
+        
+    def find_search_solution(self, solution_id: str):
+        for search_process in self.search_processes:
+            if solution_id in search_process.solutions:
+                return search_process.solutions[solution_id]
+
+        return None
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
         if request.version != self.protocol_version:
@@ -59,14 +66,20 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.StopSearchSolutionsResponse()
 
-    def DescribeSolution(self, request, context):
-        if request.solution_id not in self.solutions:
+    def DescribeSolution(self, request: core_pb2.DescribeSolutionRequest, context) -> core_pb2.DescribeSolutionResponse:
+        solution_id = request.solution_id
+        search_solution = self.find_search_solution(solution_id)
+            
+        if search_solution is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.DESCRIBE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.DescribeSolutionResponse()
 
-    def ScoreSolution(self, request, context):
-        if request.solution_id not in self.solutions:
+    def ScoreSolution(self, request: core_pb2.ScoreSolutionRequest, context) -> core_pb2.ScoreSolutionResponse:
+        solution_id = request.solution_id
+        search_solution = self.find_search_solution(solution_id)
+        if search_solution is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SCORE_SOLUTION_ERROR_MESSAGE)
+    
         return core_pb2.ScoreSolutionResponse()
 
     def GetScoreSolutionResults(self, request, context):
@@ -90,9 +103,9 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def UpdateProblem(self, request, context):
         return core_pb2.UpdateProblemRequest()
 
-    def ListPrimitives(self, request, context):
+    def ListPrimitives(self, request: core_pb2.ListPrimitivesRequest, context) -> core_pb2.ListPrimitivesResponse:
         primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
-        primitives = []
+        primitives: typing.List[pipeline_pb2.primitive__pb2.Primitive]  = []
         
         if len(primitive_bases) == 0:
             index.load_all()
@@ -104,7 +117,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
                 
         return core_pb2.ListPrimitivesResponse(primitives=primitives)
 
-    def Hello(self, request, context):
+    def Hello(self, request: core_pb2.HelloRequest, context):
         return core_pb2.HelloResponse(version=_TA2_VERSION,
                                       user_agent=_USER_AGENT,
                                       allowed_value_types=_ALLOWED_VALUE_TYPES,
