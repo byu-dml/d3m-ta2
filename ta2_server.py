@@ -3,11 +3,18 @@ import time
 import uuid
 import grpc
 import constants
+import typing
+import d3m.index as index
+import d3m.primitive_interfaces.base as base
 
 from generated_grpc import core_pb2_grpc, core_pb2
 from search_process import SearchProcess
 from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
+from pprint import pprint
+
+from wrapper.primitive import Primitive
+
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
 _TA2_VERSION = '1.0'
@@ -85,7 +92,18 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return core_pb2.UpdateProblemRequest()
 
     def ListPrimitives(self, request, context):
-        return core_pb2.ListPrimitivesResponse()
+        primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
+        primitives = []
+        
+        if len(primitive_bases) == 0:
+            index.load_all()
+            primitive_bases = index.get_loaded_primitives()
+        for primitive_base in primitive_bases:
+            metadata = primitive_base.metadata.to_json_structure()
+            primitive = Primitive.get_primitive_from_json(metadata)
+            primitives.append(primitive)
+                
+        return core_pb2.ListPrimitivesResponse(primitives=primitives)
 
     def Hello(self, request, context):
         return core_pb2.HelloResponse(version=_TA2_VERSION,

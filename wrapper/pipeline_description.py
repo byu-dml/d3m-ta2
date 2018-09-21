@@ -65,7 +65,7 @@ class PipelineDescription:
         for step in pipeline.steps:
             if isinstance(step, pipeline_module.PrimitiveStep):
                 primitive_description = step.primitive_description
-                primitive = Primitive.get_primitive_from_description(primitive_description)
+                primitive = Primitive.get_primitive_from_json(primitive_description)
                 arguments = step.arguments
                 primitive_step_arguments = PipelineDescription.get_primitive_step_arguments(arguments)
 
