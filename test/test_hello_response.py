@@ -1,7 +1,5 @@
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc, value_pb2
-from d3m.metadata import pipeline as pipeline_module
-from wrapper.pipeline_description import PipelineDescription
 
 class TestHelloResponse:
 
