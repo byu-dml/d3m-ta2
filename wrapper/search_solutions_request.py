@@ -1,7 +1,7 @@
 from wrapper.pipeline_description import PipelineDescription
 import generated_grpc.core_pb2 as core
 from wrapper.problem_description import ProblemDescription
-from pprint import pprint
+import ta2_server
 
 class SearchSolutionsRequest:
     
@@ -27,7 +27,7 @@ class SearchSolutionsRequest:
         search_solutions_request.version = protobuf_search_solutions_request.version
         search_solutions_request.time_bound = protobuf_search_solutions_request.time_bound
         search_solutions_request.priority = protobuf_search_solutions_request.priority
-        # TODO: Implement allowed_value_types
+        search_solutions_request.allowed_value_types = ta2_server.ALLOWED_VALUE_TYPES
         # TODO: Implement inputs
         
         return search_solutions_request

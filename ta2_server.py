@@ -20,7 +20,7 @@ from wrapper.primitive import Primitive
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 # TODO: Actually support these types
-_ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
+ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
 _TA2_VERSION = '1.0'
 _USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
 _NUM_SERVER_THREADS = 10
@@ -162,7 +162,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         logging.debug(f'Received HelloRequest:\n{request}')
         return core_pb2.HelloResponse(version=_TA2_VERSION,
                                       user_agent=_USER_AGENT,
-                                      allowed_value_types=_ALLOWED_VALUE_TYPES,
+                                      allowed_value_types=ALLOWED_VALUE_TYPES,
                                       supported_extensions=[]
                                       )
 
