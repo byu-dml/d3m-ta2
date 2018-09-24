@@ -51,7 +51,8 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.work_queue.put(search_process)
 
     def find_search_solution(self, solution_id: str):
-        for search_process in self.search_processes:
+        print(self.search_processes)
+        for search_id, search_process in self.search_processes.items():
             if solution_id in search_process.solutions:
                 return search_process.solutions[solution_id]
 
@@ -68,7 +69,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
         priority = search_solutions_request.priority
-        search_process = SearchProcess(search_id, search_solutions_request, priority)
+        search_process = SearchProcess(search_id, search_solutions_request)
         self.search_processes[search_id] = search_process
         self.insert_into_queue(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
