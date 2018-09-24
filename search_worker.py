@@ -12,14 +12,14 @@ class SearchWorker(threading.Thread):
         self.interrupted: bool = False
     
     def interrupt(self) -> None:
-        logging.debug('Worker interrupted')
+        logging.info('Worker interrupted')
         self.interrupted = True
     
     def search(self):
         if self.search_process is not None:
-            logging.debug(f'Starting search {self.search_process.search_id}')
+            logging.info(f'Starting search {self.search_process.search_id}')
             time.sleep(3)
-            logging.debug(f'Finished search {self.search_process.search_id}')
+            logging.info(f'Finished search {self.search_process.search_id}')
             self.search_process = None
         else:
             logging.warning("Tried to search with no search process")
