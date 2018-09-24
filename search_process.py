@@ -11,6 +11,5 @@ class SearchProcess(object):
         self.priority = request.priority
         self.solutions: typing.Dict[str, SearchSolution] = {}
 
-
     def __lt__(self, other):
         return self.priority > other.priority

@@ -68,7 +68,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
-        priority = search_solutions_request.priority
         search_process = SearchProcess(search_id, search_solutions_request)
         self.search_processes[search_id] = search_process
         self.insert_into_queue(search_process)
