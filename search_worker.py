@@ -29,7 +29,7 @@ class SearchWorker(threading.Thread):
         while not self.interrupted:
             if not self.search_queue.empty():
                 logging.debug("Grabbing some work")
-                priority, self.search_process = self.search_queue.get()
+                self.search_process = self.search_queue.get()
                 self.search()
             else:
                 # logging.debug("Queue empty sleeping")

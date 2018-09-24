@@ -47,8 +47,8 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         logging.debug("Stopped all workers")
 
     def insert_into_queue(self, search_process: SearchProcess):
-        logging.info(f'Inserting {search_process} into queue')
-        self.work_queue.put((search_process.priority, search_process))
+        logging.info(f'Inserting {search_process.search_id} into queue')
+        self.work_queue.put(search_process)
 
     def find_search_solution(self, solution_id: str):
         for search_process in self.search_processes:
