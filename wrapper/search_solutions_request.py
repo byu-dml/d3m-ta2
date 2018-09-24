@@ -12,7 +12,7 @@ class SearchSolutionsRequest:
         self.time_bound: int = None
         self.priority: int = None
         self.allowed_value_types = None 
-        self.pipeline_desrription: PipelineDescription = None
+        self.pipeline_description: PipelineDescription = None
         self.problem_description: ProblemDescription = None
         self.inputs = None
     

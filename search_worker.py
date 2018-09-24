@@ -32,7 +32,7 @@ class SearchWorker(threading.Thread):
                 priority, self.search_process = self.search_queue.get()
                 self.search()
             else:
-                logging.debug("Queue empty sleeping")
+                # logging.debug("Queue empty sleeping")
                 time.sleep(1)
         
 
