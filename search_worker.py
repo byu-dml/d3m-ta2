@@ -27,7 +27,6 @@ class SearchWorker(threading.Thread):
     def run(self):
         logging.debug(f'Worker thread {self.name} started')
         while not self.interrupted:
-            logging.debug("Checking if queue not empty")
             if not self.queue.empty():
                 logging.debug("Grabbing some work")
                 priority, self.search_process = self.queue.get()
