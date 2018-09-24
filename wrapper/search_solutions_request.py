@@ -28,7 +28,9 @@ class SearchSolutionsRequest:
         search_solutions_request.time_bound = protobuf_search_solutions_request.time_bound
         search_solutions_request.priority = protobuf_search_solutions_request.priority
         search_solutions_request.allowed_value_types = ta2_server.ALLOWED_VALUE_TYPES
-        # TODO: Implement inputs
+        # TODO: Add validation of inputs for pipelines
+        # Note: inputs are optional for fully specified pipelines with all hyper-parameters fixed
+        search_solutions_request.inputs = protobuf_search_solutions_request.inputs
         
         return search_solutions_request
         
