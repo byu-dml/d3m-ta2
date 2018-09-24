@@ -47,9 +47,9 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             worker.join()
         logging.debug("Stopped all workers")
 
-    def insert_into_queue(self, priority, search_process):
+    def insert_into_queue(self, search_process: SearchProcess):
         logging.info(f'Inserting {search_process} into queue')
-        self.work_queue.put((priority, search_process))
+        self.work_queue.put((search_process.priority, search_process))
 
     def find_search_solution(self, solution_id: str):
         for search_process in self.search_processes:
@@ -71,7 +71,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         priority = search_solutions_request.priority
         search_process = SearchProcess(search_id, search_solutions_request, priority)
         self.search_processes[search_id] = search_process
-        self.insert_into_queue(priority, search_process)
+        self.insert_into_queue(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
     def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context):
