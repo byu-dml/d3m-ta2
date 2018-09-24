@@ -1,0 +1,6 @@
+{
+   "problem": "38_sick_problem",
+   "train_inputs": ["38_sk_dataset_TRAIN"],
+   "test_inputs": ["38_sk_dataset_TEST"]
+}
+
