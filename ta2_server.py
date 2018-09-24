@@ -15,14 +15,16 @@ from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from search_process import SearchProcess
 from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
-
+from search_worker import SearchWorker
 from wrapper.primitive import Primitive
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+# TODO: Actually support these types
 _ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
 _TA2_VERSION = '1.0'
 _USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
 _NUM_SERVER_THREADS = 10
+_NUM_WORKER_THREADS = 1
 
 
 class CoreSession(core_pb2_grpc.CoreServicer):
@@ -31,6 +33,19 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
         self.work_queue = queue.PriorityQueue()
+        self.search_workers: typing.List[SearchWorker] = []
+
+        for i in range(_NUM_WORKER_THREADS):
+            worker_thread = SearchWorker(self.work_queue, name=str(i))
+            self.search_workers.append(worker_thread)
+            worker_thread.start()
+
+    def stop_workers(self) -> None:
+        logging.debug("Stopping workers")
+        for worker in self.search_workers:
+            worker.interrupt()
+            worker.join()
+        logging.debug("Stopped all workers")
 
     def insert_into_queue(self, priority, search_process):
         logging.info(f'Inserting {search_process} into queue')
@@ -153,23 +168,29 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
 
 def serve():
-    root = logging.getLogger()
-    root.setLevel(Config.log_level)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch = logging.StreamHandler(sys.stderr)
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    root.addHandler(ch)
+    initialize_logging()
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=_NUM_SERVER_THREADS))
-    core_pb2_grpc.add_CoreServicer_to_server(CoreSession(), server)
+    core_session = CoreSession()
+    core_pb2_grpc.add_CoreServicer_to_server(core_session, server)
     server.add_insecure_port('[::]:' + Config.server_port)
     server.start()
     try:
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
+        core_session.stop_workers()
         server.stop(0)
+
+
+def initialize_logging():
+    root = logging.getLogger()
+    root.setLevel(Config.log_level)
+    formatter = logging.Formatter('%(asctime)s - thread %(threadName)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler(sys.stderr)
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
 
 
 if __name__ == '__main__':
