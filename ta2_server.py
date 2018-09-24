@@ -6,7 +6,6 @@ import constants
 import typing
 import d3m.index as index
 import d3m.primitive_interfaces.base as base
-import d3m.metadata.problem as problem_metadata
 import sys
 import logging
 import queue
@@ -28,13 +27,13 @@ _NUM_WORKER_THREADS = 1
 
 class CoreSession(core_pb2_grpc.CoreServicer):
 
-    def __init__(self):
+    def __init__(self, num_workers):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
         self.work_queue = queue.PriorityQueue()
         self.search_workers: typing.List[SearchWorker] = []
 
-        for i in range(_NUM_WORKER_THREADS):
+        for i in range(num_workers):
             worker_thread = SearchWorker(self.work_queue, name=str(i))
             self.search_workers.append(worker_thread)
             worker_thread.start()
@@ -170,7 +169,7 @@ def serve():
     initialize_logging()
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=_NUM_SERVER_THREADS))
-    core_session = CoreSession()
+    core_session = CoreSession(_NUM_WORKER_THREADS)
     core_pb2_grpc.add_CoreServicer_to_server(core_session, server)
     server.add_insecure_port('[::]:' + Config.server_port)
     server.start()
