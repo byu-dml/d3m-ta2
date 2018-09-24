@@ -5,7 +5,7 @@ import time
 from search_process import SearchProcess
 
 class SearchWorker(threading.Thread):
-    def __init__(self, search_queue: queue.PriorityQueue, name):
+    def __init__(self, search_queue: queue.PriorityQueue, name: str):
         super(SearchWorker,self).__init__(name=name)
         self.queue = search_queue
         self.search_process: SearchProcess= None
