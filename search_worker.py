@@ -17,7 +17,7 @@ class SearchWorker(threading.Thread):
     
     def search(self):
         if self.search_process is not None:
-            logging.debug(f'Searching search process {self.search_process}')
+            logging.debug(f'Searching search process {self.search_process.search_id}')
             time.sleep(3)
             logging.debug("Done searching!")
             self.search_process = None
