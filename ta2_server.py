@@ -44,7 +44,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return None
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
-        logging.debug(f'Received SearchSolutionsRequest {request}')
+        logging.debug(f'Received SearchSolutionsRequest:\n{request}')
         if request.version != self.protocol_version:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.PROTOCOL_ERROR_MESSAGE)
 
@@ -59,7 +59,8 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.insert_into_queue(priority, search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
-    def GetSearchSolutionsResults(self, request, context):
+    def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context):
+        logging.debug(f'Received GetSearchSolutionsRequest:\n{request}')
         if request.search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
@@ -69,25 +70,29 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
             yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
 
-    def EndSearchSolutions(self, request, context):
+    def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context):
+        logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
         if request.search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.EndSearchSolutionsResponse()
 
-    def StopSearchSolutions(self, request, context):
+    def StopSearchSolutions(self, request: core_pb2.StopSearchSolutionsRequest, context):
+        logging.debug(f'Received StopSearchSolutionsRequest:\n{request}')
         if request.search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         return core_pb2.StopSearchSolutionsResponse()
 
     def DescribeSolution(self, request: core_pb2.DescribeSolutionRequest, context) -> core_pb2.DescribeSolutionResponse:
+        logging.debug(f'Received DescribeSolutionRequest:\n{request}')
         solution_id = request.solution_id
         search_solution = self.find_search_solution(solution_id)
-            
+
         if search_solution is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.DESCRIBE_SOLUTION_ERROR_MESSAGE)
         return core_pb2.DescribeSolutionResponse()
 
     def ScoreSolution(self, request: core_pb2.ScoreSolutionRequest, context) -> core_pb2.ScoreSolutionResponse:
+        logging.debug(f'Received ScoreSolutionRequest:\n{request}')
         solution_id = request.solution_id
         search_solution = self.find_search_solution(solution_id)
         if search_solution is None:
@@ -96,27 +101,35 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return core_pb2.ScoreSolutionResponse()
 
     def GetScoreSolutionResults(self, request, context):
+        logging.debug(f'Received GetScoreSolutionResultsRequest:\n{request}')
         yield core_pb2.GetScoreSolutionResultsResponse()
 
     def FitSolution(self, request, context):
+        logging.debug(f'Received FitSolutionRequest:\n{request}')
         return core_pb2.FitSolutionResponse()
 
     def GetFitSolutionResults(self, request, context):
+        logging.debug(f'Received GetFitSolutionResultsRequest:\n{request}')
         yield core_pb2.GetFitSolutionResultsResponse()
 
     def ProduceSolution(self, request, context):
+        logging.debug(f'Received ProduceSolutionRequest:\n{request}')
         return core_pb2.ProduceSolutionResponse()
 
     def GetProduceSolutionResults(self, request, context):
+        logging.debug(f'Received GetProduceSolutionResultsRequest:\n{request}')
         yield core_pb2.GetProduceSolutionResultsResponse
 
     def SolutionExport(self, request, context):
+        logging.debug(f'Received SolutionExportRequest:\n{request}')
         return core_pb2.SolutionExportResponse()
 
     def UpdateProblem(self, request, context):
+        logging.debug(f'Received UpdateProblemRequest:\n{request}')
         return core_pb2.UpdateProblemRequest()
 
     def ListPrimitives(self, request: core_pb2.ListPrimitivesRequest, context) -> core_pb2.ListPrimitivesResponse:
+        logging.debug(f'Received ListPrimitivesRequest:\n{request}')
         primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
         primitives: typing.List[pipeline_pb2.primitive__pb2.Primitive]  = []
         
@@ -131,6 +144,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         return core_pb2.ListPrimitivesResponse(primitives=primitives)
 
     def Hello(self, request: core_pb2.HelloRequest, context):
+        logging.debug(f'Received HelloRequest:\n{request}')
         return core_pb2.HelloResponse(version=_TA2_VERSION,
                                       user_agent=_USER_AGENT,
                                       allowed_value_types=_ALLOWED_VALUE_TYPES,
