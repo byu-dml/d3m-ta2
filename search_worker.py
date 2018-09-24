@@ -7,7 +7,7 @@ from search_process import SearchProcess
 class SearchWorker(threading.Thread):
     def __init__(self, search_queue: queue.PriorityQueue, name: str):
         super(SearchWorker,self).__init__(name=name)
-        self.queue = search_queue
+        self.search_queue = search_queue
         self.search_process: SearchProcess= None
         self.interrupted: bool = False
     
@@ -27,9 +27,9 @@ class SearchWorker(threading.Thread):
     def run(self):
         logging.debug(f'Worker thread {self.name} started')
         while not self.interrupted:
-            if not self.queue.empty():
+            if not self.search_queue.empty():
                 logging.debug("Grabbing some work")
-                priority, self.search_process = self.queue.get()
+                priority, self.search_process = self.search_queue.get()
                 self.search()
             else:
                 logging.debug("Queue empty sleeping")
