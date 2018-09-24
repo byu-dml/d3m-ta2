@@ -1,20 +1,17 @@
 import pytest
-from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2, primitive_pb2
+import generated_grpc.problem_pb2 as grpc_problem
+from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2
 from d3m.metadata import pipeline as pipeline_module
 from wrapper.pipeline_description import PipelineDescription
-import d3m.runtime as runtime
-from pprint import pprint
 
 
 class TestSearchSolutions:
 
     @staticmethod
-    def test_search_solutions_response(stub: core_pb2_grpc.CoreStub, protocol_version: str):
+    def test_search_solutions_response_1(stub: core_pb2_grpc.CoreStub, protocol_version: str, sick_problem: grpc_problem.ProblemDescription):
         response = None
-        meta = runtime.parse_meta(open('test/meta/.meta_38_sick'), '/datasets')
-        pprint(meta)
         try:
-            response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version))
+            response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem))
         except Exception as e:
             pytest.fail(f'call to SearchSolutions failed to return a valid response with exception {str(e)}')
 

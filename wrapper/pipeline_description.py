@@ -136,4 +136,3 @@ class PipelineDescription:
         }
         return switcher.get(context, 0)
 
-
