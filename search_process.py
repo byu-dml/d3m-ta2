@@ -10,6 +10,7 @@ class SearchProcess(object):
         self.search_request = request
         self.priority = request.priority
         self.solutions: typing.Dict[str, SearchSolution] = {}
+        self.completed = False
 
     def __lt__(self, other):
         return self.priority > other.priority

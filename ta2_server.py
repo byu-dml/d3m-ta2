@@ -34,7 +34,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_workers: typing.List[SearchWorker] = []
 
         for i in range(num_workers):
-            worker_thread = SearchWorker(self.work_queue, name=f'worker {i}')
+            worker_thread = SearchWorker(search_queue=self.work_queue, search_processes=self.search_processes, name=f'worker {i}')
             self.search_workers.append(worker_thread)
             worker_thread.start()
 
@@ -42,15 +42,16 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         logging.debug("Stopping workers")
         for worker in self.search_workers:
             worker.interrupt()
+        for worker in self.search_workers:
             worker.join()
         logging.debug("Stopped all workers")
 
-    def insert_into_queue(self, search_process: SearchProcess):
-        logging.info(f'Inserting {search_process.search_id} into queue')
+    def add_search_process(self, search_process: SearchProcess):
+        logging.info(f'Inserting {search_process.search_id} into queue and search_processes')
         self.work_queue.put(search_process)
+        self.search_processes[search_process.search_id] = search_process
 
     def find_search_solution(self, solution_id: str):
-        print(self.search_processes)
         for search_id, search_process in self.search_processes.items():
             if solution_id in search_process.solutions:
                 return search_process.solutions[solution_id]
@@ -69,7 +70,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_id = str(uuid.uuid4())
         search_process = SearchProcess(search_id, search_solutions_request)
         self.search_processes[search_id] = search_process
-        self.insert_into_queue(search_process)
+        self.add_search_process(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
     def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context):
