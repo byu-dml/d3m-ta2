@@ -10,7 +10,7 @@ ERRORED = 4
 class Progress:
 
     def __init__(self):
-        self.state: int = UNKNOWN
+        self.state: int = PENDING
         self.status = None
         self.start = None
         self.end = None
@@ -20,5 +20,5 @@ class Progress:
         self.end = TimestampUtil.get_current_proto_timestamp()
 
     def start_running(self):
-        self.state = PENDING
+        self.state = RUNNING
         self.start = TimestampUtil.get_current_proto_timestamp()
