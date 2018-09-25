@@ -25,7 +25,7 @@ class SearchWorker(threading.Thread):
             logging.warning("Tried to search with no search process")
 
     def run(self):
-        logging.debug(f'Worker thread {self.name} started')
+        logging.debug(f'Started {self.name}')
         while not self.interrupted:
             if not self.search_queue.empty():
                 logging.debug("Grabbing some work")

@@ -34,7 +34,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_workers: typing.List[SearchWorker] = []
 
         for i in range(num_workers):
-            worker_thread = SearchWorker(self.work_queue, name=str(i))
+            worker_thread = SearchWorker(self.work_queue, name=f'worker {i}')
             self.search_workers.append(worker_thread)
             worker_thread.start()
 
