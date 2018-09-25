@@ -4,12 +4,11 @@ from pprint import pprint
 
 
 class ProblemInput:
-    
+
     def __init__(self, protobuf_problem_input: grpc_problem.ProblemInput):
         self.protobuf_problem_input = protobuf_problem_input
         self.dataset_id = None
-        
-    
+
     @staticmethod
     def get_from_protobuf(protobuf_problem_input: grpc_problem.ProblemInput):
         problem_input = ProblemInput(protobuf_problem_input)
@@ -18,7 +17,3 @@ class ProblemInput:
         problem_input.targets = targets
 
         return problem_input
-
-        
-        
-        
