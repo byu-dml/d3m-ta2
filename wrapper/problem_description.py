@@ -37,9 +37,9 @@ class ProblemDescription:
             proto_performance_metric['metric'] = metric
             params = performance_metric['params']
             if 'k' in params:
-                new_performance_metrics['k'] = params['k']
+                proto_performance_metric['k'] = params['k']
             if 'pos_label' in params:
-                new_performance_metrics['pos_label'] = params['pos_label']
+                proto_performance_metric['pos_label'] = params['pos_label']
 
             new_performance_metrics.append(proto_performance_metric)
 

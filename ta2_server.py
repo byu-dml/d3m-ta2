@@ -27,7 +27,7 @@ _NUM_WORKER_THREADS = 1
 
 class CoreSession(core_pb2_grpc.CoreServicer):
 
-    def __init__(self, num_workers):
+    def __init__(self, num_workers=_NUM_WORKER_THREADS):
         self.protocol_version = core_pb2.DESCRIPTOR.GetOptions().Extensions[core_pb2.protocol_version]
         self.search_processes: typing.Dict[str, SearchProcess] = {}
         self.work_queue = queue.PriorityQueue()
@@ -169,7 +169,7 @@ def serve():
     initialize_logging()
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=_NUM_SERVER_THREADS))
-    core_session = CoreSession(_NUM_WORKER_THREADS)
+    core_session = CoreSession()
     core_pb2_grpc.add_CoreServicer_to_server(core_session, server)
     server.add_insecure_port('[::]:' + Config.server_port)
     server.start()
