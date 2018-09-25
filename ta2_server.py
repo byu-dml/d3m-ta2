@@ -18,7 +18,6 @@ from search_worker import SearchWorker
 from wrapper.primitive import Primitive
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
-# TODO: Actually support these types
 _TA2_VERSION = '1.0'
 _USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
 _NUM_SERVER_THREADS = 10

@@ -4,4 +4,5 @@ DESCRIBE_SOLUTION_ERROR_MESSAGE = 'solution_id argument provided in DescribeSolu
 STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE = 'search_id argument provided in StopSearchSolutionsRequest does not match any search_process'
 END_SEARCH_SOLUTIONS_ERROR_MESSAGE = 'search_id argument provided in EndSearchSolutionsRequest does not match any search_process'
 SCORE_SOLUTION_ERROR_MESSAGE = 'solution_id argument provided in ScoreSolutionRequest does not match any solution_id'
+# TODO: Actually support these types
 ALLOWED_VALUE_TYPES = ['RAW', 'DATASET_URI', 'CSV_URI']
