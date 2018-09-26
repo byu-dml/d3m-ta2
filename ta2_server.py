@@ -15,6 +15,7 @@ from search_process import SearchProcess
 from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
+from search_solution import SearchSolution
 from wrapper.primitive import Primitive
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
@@ -47,17 +48,27 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             worker.join()
         logging.debug("Stopped all workers")
 
-    def remove_search_process(self, search_id: str):
+    def remove_search_process(self, search_id: str) -> None:
+        self.stop_workers_search(search_id)
         if search_id in self.search_processes:
             self.search_processes[search_id].should_stop = True
             del self.search_processes[search_id]
 
-    def add_search_process(self, search_process: SearchProcess):
+    def stop_workers_search(self, search_id) -> None:
+        if search_id in self.search_processes:
+            self.search_processes[search_id].should_stop = True
+
+    def stop_search(self, search_id: str) -> None:
+        self.stop_workers_search(search_id)
+        if search_id in self.search_processes:
+            self.search_processes[search_id].should_stop = True
+
+    def add_search_process(self, search_process: SearchProcess) -> None:
         logging.info(f'Inserting {search_process.search_id} into queue and search_processes')
         self.work_queue.put(search_process)
         self.search_processes[search_process.search_id] = search_process
 
-    def find_search_solution(self, solution_id: str):
+    def find_search_solution(self, solution_id: str) -> typing.Optional[SearchSolution]:
         for search_id, search_process in self.search_processes.items():
             if solution_id in search_process.solutions:
                 return search_process.solutions[solution_id]
@@ -88,25 +99,26 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             search_process = self.search_processes[search_id]
             for solution in search_process.solutions.values():
                 yield solution.get_protobuf_search_solution()
+            # TODO: Stream back any solutions that are found
 
-    def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context):
-        self.end_search_solutions(context, request)
+    def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> core_pb2.EndSearchSolutionsResponse:
+        self.end_search_solutions(request, request)
         return core_pb2.EndSearchSolutionsResponse()
 
-    def end_search_solutions(self, context, request):
+    def end_search_solutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> None:
         logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
-        search_id = request.search_id
+        search_id: str = request.search_id
         if search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         self.remove_search_process(search_id)
-        for worker in self.search_workers:
-            worker.stop_search(search_id)
-        logging.debug(self.search_processes)
 
-    def StopSearchSolutions(self, request: core_pb2.StopSearchSolutionsRequest, context):
+    def StopSearchSolutions(self, request: core_pb2.StopSearchSolutionsRequest, context) -> core_pb2.StopSearchSolutionsResponse:
         logging.debug(f'Received StopSearchSolutionsRequest:\n{request}')
-        if request.search_id not in self.search_processes:
+        search_id = request.search_id
+        if search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
+        self.stop_search(search_id)
+
         return core_pb2.StopSearchSolutionsResponse()
 
     def DescribeSolution(self, request: core_pb2.DescribeSolutionRequest, context) -> core_pb2.DescribeSolutionResponse:

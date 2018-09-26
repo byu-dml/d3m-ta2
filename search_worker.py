@@ -21,6 +21,9 @@ class SearchWorker(threading.Thread):
         logging.info('Worker interrupted')
         self.interrupted = True
 
+    def should_stop_searching(self):
+        return self.search_process is not None and (self.search_process.should_stop or not self.interrupted)
+
     def stop_search(self, search_id: str) -> None:
         if self.search_process is not None and self.search_process.search_id == search_id:
             self.search_process.should_stop = True
@@ -37,7 +40,7 @@ class SearchWorker(threading.Thread):
             logging.warning("Tried to search with no search process")
             return
 
-        if self.interrupted:
+        if self.should_stop_searching():
             logging.info(f'Search {self.search_process.search_id} interrupted')
             self.search_process = None
             return
@@ -46,12 +49,12 @@ class SearchWorker(threading.Thread):
         search_solution = SearchSolution()
         self._update_search_solution(search_solution)
         search_solution.start_running()
-        if self.interrupted:
+        if self.should_stop_searching():
             logging.info(f'Search {self.search_process.search_id} interrupted')
             self.search_process = None
             return
         time.sleep(3)
-        if self.interrupted:
+        if self.should_stop_searching():
             logging.info(f'Search {self.search_process.search_id} interrupted')
             self.search_process = None
             return
@@ -71,8 +74,8 @@ class SearchWorker(threading.Thread):
         logging.debug(f'Started {self.name}')
         while not self.interrupted:
             if not self.search_queue.empty():
-                logging.debug("Grabbing some work")
                 self.search_process: SearchProcess = self.search_queue.get()
+                logging.debug(f'Grabbed search {self.search_process.search_id}')
                 if self.search_process.should_stop:
                     logging.debug(f'Grabbed stopped search process {self.search_process.search_id}')
                     self.search_process = None
