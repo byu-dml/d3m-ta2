@@ -98,14 +98,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         else:
             search_process = self.search_processes[search_id]
             sent_solutions: typing.Set[str] = set()
-            for solution in search_process.solutions.values():
+            for solution in list(search_process.solutions.values()):
                 yield solution.get_protobuf_search_solution()
                 solution_id = solution.id_
                 sent_solutions.add(solution_id)
                 logging.debug(f'Sent solution {solution_id}')
             while not search_process.completed:
                 time.sleep(1)
-                for solution in search_process.solutions.values():
+                for solution in list(search_process.solutions.values()):
                     if solution.id_ not in sent_solutions:
                         yield solution.get_protobuf_search_solution()
                         solution_id = solution.id_
