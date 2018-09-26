@@ -74,14 +74,13 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context):
         logging.debug(f'Received GetSearchSolutionsRequest:\n{request}')
-        if request.search_id not in self.search_processes:
+        search_id = request.search_id
+        if search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
-            # responses = self.search_processes[request.search_id].GetSearchSolutionsResults()
-            # for response in responses:
-            #     yield response
-            yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
-            yield core_pb2.GetSearchSolutionsResultsResponse(progress=None)
+            search_process = self.search_processes[search_id]
+            for solution in search_process.solutions.values():
+                yield solution.get_protobuf_search_solution()
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context):
         logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
