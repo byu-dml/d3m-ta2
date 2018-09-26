@@ -13,7 +13,7 @@ class SearchProcess(object):
         self.solutions: typing.Dict[str, SearchSolution] = {}
         self.completed: bool = False
         self.progress: Progress = Progress()
-        self.stopped = False
+        self.should_stop = False
 
     def __lt__(self, other):
         return self.priority > other.priority

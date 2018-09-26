@@ -49,7 +49,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def remove_search_process(self, search_id: str):
         if search_id in self.search_processes:
-            self.search_processes[search_id].stopped = True
+            self.search_processes[search_id].should_stop = True
             del self.search_processes[search_id]
 
     def add_search_process(self, search_process: SearchProcess):

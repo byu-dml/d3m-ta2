@@ -23,6 +23,7 @@ class SearchWorker(threading.Thread):
 
     def stop_search(self, search_id: str) -> None:
         if self.search_process is not None and self.search_process.search_id == search_id:
+            self.search_process.should_stop = True
             self.interrupt()
 
     def _update_search_solution(self, search_solution: SearchSolution) -> None:
@@ -72,7 +73,7 @@ class SearchWorker(threading.Thread):
             if not self.search_queue.empty():
                 logging.debug("Grabbing some work")
                 self.search_process: SearchProcess = self.search_queue.get()
-                if self.search_process.stopped:
+                if self.search_process.should_stop:
                     logging.debug(f'Grabbed stopped search process {self.search_process.search_id}')
                     self.search_process = None
                 else:
