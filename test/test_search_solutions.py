@@ -42,9 +42,9 @@ class TestSearchSolutions:
             delay = 2
             is_solution_returned = False
             tries = 0
+            results = stub.GetSearchSolutionsResults(request)
             while not is_solution_returned:
                 time.sleep(delay)
-                results = stub.GetSearchSolutionsResults(request)
                 for new_response in results:
                     is_solution_returned = True
                     assert hasattr(new_response, 'progress'), 'GetSearchSolutionsResultsResponse does not contain attribute \'progress\''

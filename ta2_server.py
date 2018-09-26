@@ -22,7 +22,7 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'
 _USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
 _NUM_SERVER_THREADS = 10
-_NUM_WORKER_THREADS = 1
+_NUM_WORKER_THREADS = 5
 
 
 class CoreSession(core_pb2_grpc.CoreServicer):
@@ -90,16 +90,30 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.add_search_process(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
-    def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context):
+    def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context) -> core_pb2.GetSearchSolutionsResultsResponse:
         logging.debug(f'Received GetSearchSolutionsRequest:\n{request}')
         search_id = request.search_id
         if search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
+            num_sent = 0
             search_process = self.search_processes[search_id]
+            sent_solutions: typing.List[str] = []
             for solution in search_process.solutions.values():
                 yield solution.get_protobuf_search_solution()
-            # TODO: Stream back any solutions that are found
+                num_sent += 1
+                solution_id = solution.id_
+                sent_solutions.append(solution_id)
+                logging.debug(f'Sent solution {solution_id}')
+            while not search_process.completed:
+                time.sleep(1)
+                for solution in search_process.solutions.values():
+                    if solution.id_ not in sent_solutions:
+                        num_sent += 1
+                        yield solution.get_protobuf_search_solution()
+                        solution_id = solution.id_
+                        sent_solutions.append(solution_id)
+                        logging.debug(f'Sent solution {solution_id}')
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> core_pb2.EndSearchSolutionsResponse:
         self.end_search_solutions(request, context)
