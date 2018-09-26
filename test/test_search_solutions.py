@@ -40,13 +40,13 @@ class TestSearchSolutions:
         max_tries = 4
         try:
             delay = 2
-            returned = 0
+            is_solution_returned = False
             tries = 0
-            while returned == 0:
+            while not is_solution_returned:
                 time.sleep(delay)
                 results = stub.GetSearchSolutionsResults(request)
                 for new_response in results:
-                    returned += 1
+                    is_solution_returned = True
                     assert hasattr(new_response, 'progress'), 'GetSearchSolutionsResultsResponse does not contain attribute \'progress\''
                     assert hasattr(new_response, 'done_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'done_ticks\''
                     assert hasattr(new_response, 'all_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'all_ticks\''
