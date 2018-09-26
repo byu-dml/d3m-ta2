@@ -39,3 +39,10 @@ def sick_problem() -> grpc_problem.ProblemDescription:
 @pytest.fixture()
 def no_worker_core_session() -> ta2_server.CoreSession:
     return ta2_server.CoreSession(0)
+
+
+@pytest.fixture()
+def search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str, sick_problem: grpc_problem.ProblemDescription) -> str:
+    request = core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem)
+    response: core_pb2.SearchSolutionsResponse = stub.SearchSolutions(request)
+    return response.search_id

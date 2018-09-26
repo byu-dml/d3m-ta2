@@ -33,7 +33,9 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_workers: typing.List[SearchWorker] = []
 
         for i in range(num_workers):
-            worker_thread = SearchWorker(search_queue=self.work_queue, search_processes=self.search_processes, name=f'worker {i}')
+            worker_thread = SearchWorker(search_queue=self.work_queue,
+                                         search_processes=self.search_processes,
+                                         name=f'worker {i}')
             self.search_workers.append(worker_thread)
             worker_thread.start()
 
@@ -44,6 +46,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         for worker in self.search_workers:
             worker.join()
         logging.debug("Stopped all workers")
+
+    def remove_search_process(self, search_id: str):
+        if search_id in self.search_processes:
+            self.search_processes[search_id].stopped = True
+            del self.search_processes[search_id]
 
     def add_search_process(self, search_process: SearchProcess):
         logging.info(f'Inserting {search_process.search_id} into queue and search_processes')
@@ -83,10 +90,18 @@ class CoreSession(core_pb2_grpc.CoreServicer):
                 yield solution.get_protobuf_search_solution()
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context):
-        logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
-        if request.search_id not in self.search_processes:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
+        self.end_search_solutions(context, request)
         return core_pb2.EndSearchSolutionsResponse()
+
+    def end_search_solutions(self, context, request):
+        logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
+        search_id = request.search_id
+        if search_id not in self.search_processes:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
+        self.remove_search_process(search_id)
+        for worker in self.search_workers:
+            worker.stop_search(search_id)
+        logging.debug(self.search_processes)
 
     def StopSearchSolutions(self, request: core_pb2.StopSearchSolutionsRequest, context):
         logging.debug(f'Received StopSearchSolutionsRequest:\n{request}')
