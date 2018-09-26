@@ -102,7 +102,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             # TODO: Stream back any solutions that are found
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> core_pb2.EndSearchSolutionsResponse:
-        self.end_search_solutions(request, request)
+        self.end_search_solutions(request, context)
         return core_pb2.EndSearchSolutionsResponse()
 
     def end_search_solutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> None:

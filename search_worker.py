@@ -21,8 +21,8 @@ class SearchWorker(threading.Thread):
         logging.info('Worker interrupted')
         self.interrupted = True
 
-    def should_stop_searching(self):
-        return self.search_process is not None and (self.search_process.should_stop or not self.interrupted)
+    def should_stop_searching(self) -> bool:
+        return self.search_process is not None and (self.search_process.should_stop or self.interrupted)
 
     def stop_search(self, search_id: str) -> None:
         if self.search_process is not None and self.search_process.search_id == search_id:
@@ -35,34 +35,28 @@ class SearchWorker(threading.Thread):
             return
         self.search_process.solutions[search_solution.id_] = search_solution
 
-    def search(self):
+    def search(self) -> None:
         if self.search_process is None:
             logging.warning("Tried to search with no search process")
             return
 
-        if self.should_stop_searching():
-            logging.info(f'Search {self.search_process.search_id} interrupted')
-            self.search_process = None
-            return
-
         logging.info(f'Starting search {self.search_process.search_id}')
-        search_solution = SearchSolution()
-        self._update_search_solution(search_solution)
-        search_solution.start_running()
-        if self.should_stop_searching():
-            logging.info(f'Search {self.search_process.search_id} interrupted')
-            self.search_process = None
-            return
-        time.sleep(3)
-        if self.should_stop_searching():
-            logging.info(f'Search {self.search_process.search_id} interrupted')
-            self.search_process = None
-            return
-        search_solution.complete()
+        for i in range(3):
+            if self.should_stop_searching():
+                logging.info(f'Search {self.search_process.search_id} interrupted')
+                self.search_process = None
+                return
+            search_solution = SearchSolution()
+            logging.debug(f'Adding solution {search_solution.id_}')
+            self._update_search_solution(search_solution)
+            search_solution.start_running()
+            time.sleep(3)
+            search_solution.complete()
+
         logging.info(f'Finished search {self.search_process.search_id}')
         self._mark_search_complete()
 
-    def _mark_search_complete(self):
+    def _mark_search_complete(self) -> None:
         if self.search_process is None:
             logging.warning('No search process to mark complete')
             return
