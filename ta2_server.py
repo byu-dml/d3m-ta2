@@ -110,7 +110,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_solution = self.find_search_solution(solution_id)
         if search_solution is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SCORE_SOLUTION_ERROR_MESSAGE)
-    
+
         return core_pb2.ScoreSolutionResponse()
 
     def GetScoreSolutionResults(self, request, context):
@@ -144,8 +144,8 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def ListPrimitives(self, request: core_pb2.ListPrimitivesRequest, context) -> core_pb2.ListPrimitivesResponse:
         logging.debug(f'Received ListPrimitivesRequest:\n{request}')
         primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
-        primitives: typing.List[pipeline_pb2.primitive__pb2.Primitive]  = []
-        
+        primitives: typing.List[pipeline_pb2.primitive__pb2.Primitive] = []
+
         if len(primitive_bases) == 0:
             index.load_all()
             primitive_bases = index.get_loaded_primitives()
@@ -153,7 +153,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             metadata = primitive_base.metadata.to_json_structure()
             primitive = Primitive.get_primitive_from_json(metadata)
             primitives.append(primitive)
-    
+
         return core_pb2.ListPrimitivesResponse(primitives=primitives)
 
     def Hello(self, request: core_pb2.HelloRequest, context):
@@ -167,7 +167,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
 def serve():
     initialize_logging()
-    
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=_NUM_SERVER_THREADS))
     core_session = CoreSession()
     core_pb2_grpc.add_CoreServicer_to_server(core_session, server)
