@@ -73,7 +73,7 @@ class SearchWorker(threading.Thread):
                 logging.debug("Grabbing some work")
                 self.search_process: SearchProcess = self.search_queue.get()
                 if self.search_process.stopped:
-                    logging.debug('Grabbed stopped search process')
+                    logging.debug(f'Grabbed stopped search process {self.search_process.search_id}')
                     self.search_process = None
                 else:
                     self.search()
