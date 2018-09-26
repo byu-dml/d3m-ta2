@@ -97,11 +97,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         else:
             search_process = self.search_processes[search_id]
-            sent_solutions: typing.List[str] = []
+            sent_solutions: typing.Set[str] = set()
             for solution in search_process.solutions.values():
                 yield solution.get_protobuf_search_solution()
                 solution_id = solution.id_
-                sent_solutions.append(solution_id)
+                sent_solutions.add(solution_id)
                 logging.debug(f'Sent solution {solution_id}')
             while not search_process.completed:
                 time.sleep(1)
@@ -109,7 +109,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
                     if solution.id_ not in sent_solutions:
                         yield solution.get_protobuf_search_solution()
                         solution_id = solution.id_
-                        sent_solutions.append(solution_id)
+                        sent_solutions.add(solution_id)
                         logging.debug(f'Sent solution {solution_id}')
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> core_pb2.EndSearchSolutionsResponse:
