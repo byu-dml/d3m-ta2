@@ -3,7 +3,6 @@ import generated_grpc.problem_pb2 as grpc_problem
 from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2
 from d3m.metadata import pipeline as pipeline_module
 from wrapper.pipeline_description import PipelineDescription
-import time
 
 
 class TestSearchSolutions:
