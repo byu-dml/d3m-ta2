@@ -34,29 +34,18 @@ class TestSearchSolutions:
 
     @staticmethod
     def test_get_search_solutions_results_response(stub: core_pb2_grpc.CoreStub, protocol_version: str, sick_problem: grpc_problem.ProblemDescription):
-        response = stub.SearchSolutions(core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem))
+        solutions_request = core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem)
+        response = stub.SearchSolutions(solutions_request)
         search_id = response.search_id
         request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)
-        max_tries = 4
         try:
-            delay = 2
-            is_solution_returned = False
-            tries = 0
             results = stub.GetSearchSolutionsResults(request)
-            while not is_solution_returned:
-                time.sleep(delay)
-                for new_response in results:
-                    is_solution_returned = True
-                    assert hasattr(new_response, 'progress'), 'GetSearchSolutionsResultsResponse does not contain attribute \'progress\''
-                    assert hasattr(new_response, 'done_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'done_ticks\''
-                    assert hasattr(new_response, 'all_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'all_ticks\''
-                    assert hasattr(new_response, 'solution_id'), 'GetSearchSolutionsResultsResponse does not contain attribute \'solution_id\''
-                    assert isinstance(new_response, core_pb2.GetSearchSolutionsResultsResponse), 'GetSearchSolutionsResponse not returned'
-
-                delay = delay ** 2
-                tries += 1
-                if tries >= max_tries:
-                    pytest.fail('Max tries exceeded for getting a search solution response')
+            for new_response in results:
+                assert hasattr(new_response, 'progress'), 'GetSearchSolutionsResultsResponse does not contain attribute \'progress\''
+                assert hasattr(new_response, 'done_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'done_ticks\''
+                assert hasattr(new_response, 'all_ticks'), 'GetSearchSolutionsResultsResponse does not contain attribute \'all_ticks\''
+                assert hasattr(new_response, 'solution_id'), 'GetSearchSolutionsResultsResponse does not contain attribute \'solution_id\''
+                assert isinstance(new_response, core_pb2.GetSearchSolutionsResultsResponse), 'GetSearchSolutionsResponse not returned'
 
         except Exception as e:
             pytest.fail(f'call to GetSearchSolutionsResults failed to return a valid response stream with exception {str(e)}')
