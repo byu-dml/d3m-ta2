@@ -21,8 +21,8 @@ from wrapper.primitive import Primitive
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'
 _USER_AGENT = f'BYU TA2 version: {_TA2_VERSION}'
-_NUM_SERVER_THREADS = 10
-_NUM_WORKER_THREADS = 5
+_NUM_SERVER_THREADS = Config.num_server_request_workers
+_NUM_WORKER_THREADS = Config.num_search_workers
 
 
 class CoreSession(core_pb2_grpc.CoreServicer):
