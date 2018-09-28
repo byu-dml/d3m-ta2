@@ -50,6 +50,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         logging.debug("Stopped all workers")
 
     def remove_search_process(self, search_id: str) -> None:
+        logging.debug(f'Removing search {search_id}')
         self.stop_workers_search(search_id)
         if search_id in self.search_processes:
             self.search_processes[search_id].should_stop = True
@@ -100,22 +101,21 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_id = request.search_id
         if search_id not in self.search_processes:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
-        else:
-            search_process = self.search_processes[search_id]
-            sent_solutions: typing.Set[str] = set()
+        search_process = self.search_processes[search_id]
+        sent_solutions: typing.Set[str] = set()
+        for solution in list(search_process.solutions.values()):
+            yield solution.get_protobuf_search_solution()
+            solution_id = solution.id_
+            sent_solutions.add(solution_id)
+            logging.debug(f'Sent solution {solution_id}')
+        while not search_process.completed and not search_process.should_stop:
+            time.sleep(1)
             for solution in list(search_process.solutions.values()):
-                yield solution.get_protobuf_search_solution()
-                solution_id = solution.id_
-                sent_solutions.add(solution_id)
-                logging.debug(f'Sent solution {solution_id}')
-            while not search_process.completed and not search_process.should_stop:
-                time.sleep(1)
-                for solution in list(search_process.solutions.values()):
-                    if solution.id_ not in sent_solutions:
-                        yield solution.get_protobuf_search_solution()
-                        solution_id = solution.id_
-                        sent_solutions.add(solution_id)
-                        logging.debug(f'Sent solution {solution_id}')
+                if solution.id_ not in sent_solutions:
+                    yield solution.get_protobuf_search_solution()
+                    solution_id = solution.id_
+                    sent_solutions.add(solution_id)
+                    logging.debug(f'Sent solution {solution_id}')
 
     def EndSearchSolutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> core_pb2.EndSearchSolutionsResponse:
         self.end_search_solutions(request, context)
