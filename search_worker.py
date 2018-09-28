@@ -54,7 +54,7 @@ class SearchWorker(threading.Thread):
         if self.search_process is not None and self.search_process.search_id == search_id:
             self.search_process.should_stop = True
 
-    def _remove_search_process(self):
+    def _remove_search_process(self) -> None:
         logging.info(f'Search {self.search_process.search_id} interrupted')
         self.search_process.should_stop = True
         self.search_process = None
