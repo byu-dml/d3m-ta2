@@ -38,7 +38,7 @@ class SearchWorker(threading.Thread):
         logging.info(f'Starting search {self.search_process.search_id}')
         for i in range(3):
             if self.should_stop_searching():
-                self._stop_search()
+                self._remove_search_process()
                 return
             search_solution = SearchSolution()
             logging.debug(f'Adding solution {search_solution.id_}')
@@ -54,7 +54,7 @@ class SearchWorker(threading.Thread):
         if self.search_process is not None and self.search_process.search_id == search_id:
             self.search_process.should_stop = True
 
-    def _stop_search(self):
+    def _remove_search_process(self):
         logging.info(f'Search {self.search_process.search_id} interrupted')
         self.search_process.should_stop = True
         self.search_process = None
