@@ -9,6 +9,7 @@ import d3m.primitive_interfaces.base as base
 import sys
 import logging
 import queue
+import threading
 
 from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from search_process import SearchProcess
@@ -59,6 +60,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             self.search_processes[search_id].should_stop = True
 
     def stop_search(self, search_id: str) -> None:
+        logging.debug(f'Stopping search {search_id}')
         self.stop_workers_search(search_id)
         if search_id in self.search_processes:
             self.search_processes[search_id].should_stop = True
@@ -85,6 +87,9 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
+        if search_solutions_request.time_bound > 0:
+            timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
+            timer.start()
         search_process = SearchProcess(search_id, search_solutions_request)
         self.search_processes[search_id] = search_process
         self.add_search_process(search_process)
@@ -103,7 +108,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
                 solution_id = solution.id_
                 sent_solutions.add(solution_id)
                 logging.debug(f'Sent solution {solution_id}')
-            while not search_process.completed:
+            while not search_process.completed and not search_process.should_stop:
                 time.sleep(1)
                 for solution in list(search_process.solutions.values()):
                     if solution.id_ not in sent_solutions:
