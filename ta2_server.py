@@ -56,8 +56,8 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             del self.search_processes[search_id]
 
     def stop_workers_search(self, search_id) -> None:
-        if search_id in self.search_processes:
-            self.search_processes[search_id].should_stop = True
+        for worker in self.search_workers:
+            worker.stop_search(search_id)
 
     def stop_search(self, search_id: str) -> None:
         logging.debug(f'Stopping search {search_id}')

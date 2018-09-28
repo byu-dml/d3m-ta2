@@ -24,11 +24,6 @@ class SearchWorker(threading.Thread):
     def should_stop_searching(self) -> bool:
         return self.search_process is not None and (self.search_process.should_stop or self.interrupted)
 
-    def stop_search(self, search_id: str) -> None:
-        if self.search_process is not None and self.search_process.search_id == search_id:
-            self.search_process.should_stop = True
-            self.interrupt()
-
     def _update_search_solution(self, search_solution: SearchSolution) -> None:
         if self.search_process is None:
             logging.warning('No search process to add a solution to')
@@ -54,6 +49,10 @@ class SearchWorker(threading.Thread):
 
         logging.info(f'Finished search {self.search_process.search_id}')
         self._mark_search_complete()
+
+    def stop_search(self, search_id: str) -> None:
+        if self.search_process is not None and self.search_process.search_id == search_id:
+            self.search_process.should_stop = True
 
     def _stop_search(self):
         logging.info(f'Search {self.search_process.search_id} interrupted')
