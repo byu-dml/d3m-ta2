@@ -1,7 +1,7 @@
 from generated_grpc import pipeline_pb2
 from d3m.metadata import pipeline as pipeline_module
 import typing
-from wrapper.primitive import Primitive
+from wrapper.primitive.primitive import Primitive
 from google.protobuf.timestamp_pb2 import Timestamp
 import datetime
 from util.timestamp_util import TimestampUtil
@@ -74,14 +74,14 @@ class PipelineDescription:
                 hyperparams = step.hyperparams
                 primitive_step_hyperparams = PipelineDescription.get_primitive_step_hyperparams(hyperparams)
 
-
                 # TODO: hyperparams field
                 # TODO: users field (optional)
 
-
                 primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
                                                                                            arguments=primitive_step_arguments,
-                                                                                           outputs=primitive_step_outputs)
+                                                                                           outputs=primitive_step_outputs,
+                                                                                           hyperparams=primitive_step_hyperparams
+                                                                                           )
 
                 pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_description_step)
                 steps.append(pipeline_description_step)
@@ -91,18 +91,19 @@ class PipelineDescription:
     def get_primitive_step_hyperparams(hyperparams: dict) -> typing.Dict[str, pipeline_pb2.PrimitiveStepHyperparameter]:
         primitive_step_hyperparams = {}
         for key, hyperparam in hyperparams.items():
-            data = hyperparam['data']
-            type = hyperparam['type']
-            primitive_step_hyperparam = None
-            if type == pipeline_module.ArgumentType.CONTAINER:
-                pass
-            if type == pipeline_module.ArgumentType.DATA:
-                pass
-            if type == pipeline_module.ArgumentType.PRIMITIVE:
-                pass
-            if type == pipeline_module.ArgumentType.VALUE:
-                pass
-
+            protobuf_param = pipeline_pb2.PrimitiveStepHyperparameter(hyperparam)
+            primitive_step_hyperparams[key] = protobuf_param
+            # data = hyperparam['data']
+            # type = hyperparam['type']
+            # if type == pipeline_module.ArgumentType.CONTAINER:
+            #     pass
+            # if type == pipeline_module.ArgumentType.DATA:
+            #     pass
+            # if type == pipeline_module.ArgumentType.PRIMITIVE:
+            #     pass
+            # if type == pipeline_module.ArgumentType.VALUE:
+            #     pass
+        return primitive_step_hyperparams
 
     @staticmethod
     def get_primitive_step_outputs(outputs: typing.List[str]) -> typing.List[pipeline_pb2.StepOutput]:
@@ -111,7 +112,6 @@ class PipelineDescription:
             primitive_step_output = pipeline_pb2.StepOutput(id=output)
             primitive_step_outputs.append(primitive_step_output)
         return primitive_step_outputs
-
 
     @staticmethod
     def get_primitive_step_arguments(arguments: dict) -> typing.Dict[str, pipeline_pb2.PrimitiveStepArgument]:
