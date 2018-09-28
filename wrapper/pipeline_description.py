@@ -4,6 +4,7 @@ import typing
 from wrapper.primitive import Primitive
 from google.protobuf.timestamp_pb2 import Timestamp
 import datetime
+from util.timestamp_util import TimestampUtil
 
 
 class PipelineDescription:
@@ -11,7 +12,7 @@ class PipelineDescription:
     @staticmethod
     def pipeline_to_protobuf_pipeline(pipeline: pipeline_module.Pipeline) -> pipeline_pb2.PipelineDescription:
         pipeline_id = pipeline.id
-        pipeline_created = PipelineDescription.get_protobuf_timestamp(pipeline)
+        pipeline_created = PipelineDescription.get_created_protobuf(pipeline)
         pipeline_context = PipelineDescription.pipeline_context_enum_to_proto_pipeline_context_enum(pipeline.context)
         pipeline_name = pipeline.name
         pipeline_description = pipeline.description
@@ -134,12 +135,9 @@ class PipelineDescription:
         return primitive_step_arguments
 
     @staticmethod
-    def get_protobuf_timestamp(pipeline: pipeline_module.Pipeline) -> Timestamp:
+    def get_created_protobuf(pipeline: pipeline_module.Pipeline) -> Timestamp:
         created_datetime: datetime.datetime = pipeline.created
-        created_datetime = created_datetime.replace(tzinfo=None)
-        created: Timestamp = Timestamp()
-        created.FromDatetime(created_datetime)
-        return created
+        return TimestampUtil.get_proto_timestamp(created_datetime)
 
     @staticmethod
     def get_pipeline_from_protobuf_pipeline(protobuf_pipeline: pipeline_pb2.PipelineDescription) -> pipeline_module.Pipeline:

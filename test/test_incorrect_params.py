@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import grpc
 import unittest
 from generated_grpc import core_pb2_grpc, core_pb2
