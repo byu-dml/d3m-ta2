@@ -17,7 +17,7 @@ from config import Config
 import wrapper.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
 from search_solution import SearchSolution
-from wrapper.primitive import Primitive
+from wrapper.primitive.primitive import Primitive
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'

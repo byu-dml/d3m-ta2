@@ -1,3 +1,5 @@
+from generated_grpc import pipeline_pb2
+
 
 class ContainerArgument:
 
@@ -5,8 +7,7 @@ class ContainerArgument:
         self.data = data
 
     def to_protobuf(self):
-        #return new protobuf GRPC object
-        pass
+        return pipeline_pb2.ContainerArgument(data=self.data)
 
 
 
