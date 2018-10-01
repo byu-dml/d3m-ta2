@@ -68,26 +68,27 @@ class PipelineDescription:
         steps = []
         for step in pipeline.steps:
             if isinstance(step, pipeline_module.PrimitiveStep):
-                primitive_description = step.primitive_description
-                primitive = Primitive.get_primitive_from_json(primitive_description)
-                arguments = step.arguments
-                primitive_step_arguments = PrimitiveStepArgumentsFactory.get_protobuf_arguments(arguments)
-                outputs = step.outputs
-                primitive_step_outputs = PipelineDescription.get_primitive_step_outputs(outputs)
-                hyperparams = step.hyperparams
-                primitive_step_hyperparams = PrimitiveStepHyperparamFactory.get_protobuf_hyperparams(hyperparams)
-                # TODO: hyperparams field
-                # TODO: users field (optional)
-
-                primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
-                                                                                           arguments=primitive_step_arguments,
-                                                                                           outputs=primitive_step_outputs,
-                                                                                           hyperparams=primitive_step_hyperparams
-                                                                                           )
-
-                pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_description_step)
-                steps.append(pipeline_description_step)
+                PipelineDescription.get_pipeline_description_steps(step, steps)
         return steps
+
+    @staticmethod
+    def get_pipeline_description_steps(step, steps):
+        primitive_description = step.primitive_description
+        primitive = Primitive.get_primitive_from_json(primitive_description)
+        arguments = step.arguments
+        primitive_step_arguments = PrimitiveStepArgumentsFactory.get_protobuf_arguments(arguments)
+        outputs = step.outputs
+        primitive_step_outputs = PipelineDescription.get_primitive_step_outputs(outputs)
+        hyperparams = step.hyperparams
+        primitive_step_hyperparams = PrimitiveStepHyperparamFactory.get_protobuf_hyperparams(hyperparams)
+        # TODO: users field (optional)
+        primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
+                                                                                   arguments=primitive_step_arguments,
+                                                                                   outputs=primitive_step_outputs,
+                                                                                   hyperparams=primitive_step_hyperparams
+                                                                                   )
+        pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_description_step)
+        steps.append(pipeline_description_step)
 
     @staticmethod
     def get_primitive_step_outputs(outputs: typing.List[str]) -> typing.List[pipeline_pb2.StepOutput]:
