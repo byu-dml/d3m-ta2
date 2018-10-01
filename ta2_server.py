@@ -18,6 +18,7 @@ import wrapper.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
 from search_solution import SearchSolution
 from wrapper.primitive.primitive import Primitive
+from d3m.metadata import pipeline as pipeline_module
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'
@@ -86,6 +87,15 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         problem = request.problem.problem
         if not hasattr(problem, 'id') or problem.id == '':
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
+        template = request.template
+        if hasattr(template, 'id') and template.id is not '':
+            pipeline = pipeline_module.Pipeline(
+                pipeline_id=template.id,
+                context=template.context,
+                name=template.name,
+                created=template.created,
+                description=template.description
+            )
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
         if search_solutions_request.time_bound > 0:
