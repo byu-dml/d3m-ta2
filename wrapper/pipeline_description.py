@@ -75,12 +75,9 @@ class PipelineDescription:
     def get_pipeline_description_steps(step, steps):
         primitive_description = step.primitive_description
         primitive = Primitive.get_primitive_from_json(primitive_description)
-        arguments = step.arguments
-        primitive_step_arguments = PrimitiveStepArgumentsFactory.get_protobuf_arguments(arguments)
-        outputs = step.outputs
-        primitive_step_outputs = PipelineDescription.get_primitive_step_outputs(outputs)
-        hyperparams = step.hyperparams
-        primitive_step_hyperparams = PrimitiveStepHyperparamFactory.get_protobuf_hyperparams(hyperparams)
+        primitive_step_arguments = PrimitiveStepArgumentsFactory.to_protobuf_arguments(step.arguments)
+        primitive_step_outputs = PipelineDescription.get_primitive_step_outputs(step.outputs)
+        primitive_step_hyperparams = PrimitiveStepHyperparamFactory.to_protobuf_hyperparams(step.hyperparams)
         # TODO: users field (optional)
         primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
                                                                                    arguments=primitive_step_arguments,
@@ -120,6 +117,7 @@ class PipelineDescription:
 
         # add steps to pipeline
         for protobuf_step in protobuf_pipeline.steps:
+            print("GOING THROUGH PROTOBUF STEPS")
             if protobuf_step.WhichOneof('step') == 'primitive':
                 protobuf_primitive_step = protobuf_step.primitive
                 protobuf_primitive_description = protobuf_primitive_step.primitive
@@ -133,30 +131,12 @@ class PipelineDescription:
                 step = pipeline_module.PrimitiveStep(primitive_description=primitive_description)
 
                 # add arguments to primitive step
-                for name, protobuf_argument in protobuf_primitive_step.arguments.items():
-                    argument_type_str = protobuf_argument.WhichOneof('argument')
-                    data_reference = getattr(protobuf_argument, argument_type_str).data
-                    argument_type = pipeline_module.ArgumentType[argument_type_str.upper()]
-                    step.add_argument(name=name, argument_type=argument_type, data_reference=data_reference)
+                PrimitiveStepArgumentsFactory.from_protobuf_arguments(protobuf_primitive_step.arguments, step)
 
                 # add hyperparams to primitive step
-                # for name, protobuf_hyperparam in protobuf_primitive_step.hyperparams.items():
-                #     if protobuf_hyperparam.WhichOneof('argument') == 'container':
-                #         argument_type = pipeline_module.ArgumentType.CONTAINER
-                #         data = protobuf_hyperparam.container.data
-                #     elif protobuf_hyperparam.WhichOneof('argument') == 'data':
-                #         argument_type = pipeline_module.ArgumentType.DATA
-                #         data = protobuf_hyperparam.data.data
-                #     elif protobuf_hyperparam.WhichOneof('argument') == 'primitive':
-                #         argument_type = pipeline_module.ArgumentType.PRIMITIVE
-                #         data = protobuf_hyperparam.primitive.data
-                #     elif protobuf_hyperparam.WhichOneof('argument') == 'value':
-                #         argument_type = pipeline_module.ArgumentType.VALUE
-                #         data = protobuf_hyperparam.value.data
-                #
-                #     step.add_hyperparameter(name=name, argument_type=type, data=data)
+                PrimitiveStepHyperparamFactory.from_protobuf_hyperparams(protobuf_primitive_step.hyperparams, step)
 
-                # add outputs to primitive
+                # add outputs to primitive step
                 for output in protobuf_primitive_step.outputs:
                     step.add_output(output.id)
 
@@ -164,8 +144,8 @@ class PipelineDescription:
 
                 pipeline.add_step(step)
 
-        # for output in protobuf_pipeline.outputs:
-        #     pipeline.add_output(output.data, output.name)
+        for output in protobuf_pipeline.outputs:
+            pipeline.add_output(output.data, output.name)
 
         return pipeline
 

@@ -92,7 +92,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
             timer.start()
         search_process = SearchProcess(search_id, search_solutions_request)
-        self.search_processes[search_id] = search_process
         self.add_search_process(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
