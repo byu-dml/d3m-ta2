@@ -13,5 +13,10 @@ class Primitive:
         if 'digest' in json_description:
             digest = json_description['digest']
 
-        primitive = pipeline_pb2.primitive__pb2.Primitive(id=id_, version=version, python_path=python_path, name=name, digest=digest)
+        primitive = pipeline_pb2.primitive__pb2.Primitive(id=id_,
+                                                          version=version,
+                                                          python_path=python_path,
+                                                          name=name,
+                                                          digest=digest
+                                                          )
         return primitive

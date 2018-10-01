@@ -1,4 +1,5 @@
-from generated_grpc import pipeline_pb2
+from generated_grpc import pipeline_pb2, value_pb2
+from wrapper.value.value_raw import ValueRaw
 
 
 class ValueArgument:
@@ -7,5 +8,6 @@ class ValueArgument:
         self.data = data
 
     def to_protobuf(self):
-        # TODO: need to find out more detail on what kind of value data this is in order to instantiate the correct subtype
-        return pipeline_pb2.ValueArgument(data=self.data)
+        value_raw = ValueRaw(self.data)
+        value = value_pb2.Value(raw=value_raw.to_protobuf())
+        return pipeline_pb2.ValueArgument(data=value)

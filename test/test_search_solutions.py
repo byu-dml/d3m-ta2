@@ -60,6 +60,7 @@ class TestSearchSolutions:
                                                   problem=sick_problem
                                                   )
         response = stub.SearchSolutions(request)
+        assert False
         assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions with fully specified pipeline did not return an instance of SearchSolutionsResponse'
 
     @staticmethod

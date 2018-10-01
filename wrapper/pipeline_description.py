@@ -7,6 +7,7 @@ import datetime
 from util.timestamp_util import TimestampUtil
 from wrapper.primitive.hyperparameters.primitive_step_hyperparams_factory import PrimitiveStepHyperparamFactory
 from wrapper.primitive.primitive_step_arguments_factory import PrimitiveStepArgumentsFactory
+from pprint import pprint
 
 
 class PipelineDescription:
@@ -73,15 +74,15 @@ class PipelineDescription:
                 primitive_step_arguments = PrimitiveStepArgumentsFactory.get_protobuf_arguments(arguments)
                 outputs = step.outputs
                 primitive_step_outputs = PipelineDescription.get_primitive_step_outputs(outputs)
-                # hyperparams = step.hyperparams
-                # primitive_step_hyperparams = PrimitiveStepHyperparamFactory.get_protobuf_hyperparams(hyperparams)
+                hyperparams = step.hyperparams
+                primitive_step_hyperparams = PrimitiveStepHyperparamFactory.get_protobuf_hyperparams(hyperparams)
                 # TODO: hyperparams field
                 # TODO: users field (optional)
 
                 primitive_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
                                                                                            arguments=primitive_step_arguments,
                                                                                            outputs=primitive_step_outputs,
-                                                                                           # hyperparams=primitive_step_hyperparams
+                                                                                           hyperparams=primitive_step_hyperparams
                                                                                            )
 
                 pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_description_step)
