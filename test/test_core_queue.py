@@ -3,10 +3,10 @@ from generated_grpc import core_pb2
 import uuid
 
 
-class TestCoreSession:
+class TestCoreQueue:
 
     @staticmethod
-    def test_adding_searches(no_worker_core_session):
+    def test_queue_ordering(no_worker_core_session):
         search_solutions_request = core_pb2.SearchSolutionsRequest(priority=0)
         low_priority_search = SearchProcess(uuid.uuid4(), search_solutions_request)
         search_solutions_request = core_pb2.SearchSolutionsRequest(priority=1)

@@ -7,7 +7,6 @@ import datetime
 from util.timestamp_util import TimestampUtil
 from wrapper.primitive.hyperparameters.primitive_step_hyperparams_factory import PrimitiveStepHyperparamFactory
 from wrapper.primitive.primitive_step_arguments_factory import PrimitiveStepArgumentsFactory
-from pprint import pprint
 
 
 class PipelineDescription:
@@ -117,7 +116,6 @@ class PipelineDescription:
 
         # add steps to pipeline
         for protobuf_step in protobuf_pipeline.steps:
-            print("GOING THROUGH PROTOBUF STEPS")
             if protobuf_step.WhichOneof('step') == 'primitive':
                 protobuf_primitive_step = protobuf_step.primitive
                 protobuf_primitive_description = protobuf_primitive_step.primitive
@@ -140,7 +138,7 @@ class PipelineDescription:
                 for output in protobuf_primitive_step.outputs:
                     step.add_output(output.id)
 
-                # TODO: add users field (options)
+                # TODO: add users field (optional)
 
                 pipeline.add_step(step)
 

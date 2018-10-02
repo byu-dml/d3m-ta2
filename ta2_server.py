@@ -87,15 +87,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         problem = request.problem.problem
         if not hasattr(problem, 'id') or problem.id == '':
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
-        template = request.template
-        if hasattr(template, 'id') and template.id is not '':
-            pipeline = pipeline_module.Pipeline(
-                pipeline_id=template.id,
-                context=template.context,
-                name=template.name,
-                created=template.created,
-                description=template.description
-            )
         search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
         if search_solutions_request.time_bound > 0:
