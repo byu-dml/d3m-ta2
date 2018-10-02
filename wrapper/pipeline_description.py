@@ -101,14 +101,14 @@ class PipelineDescription:
 
     @staticmethod
     def get_pipeline_from_protobuf_pipeline(protobuf_pipeline: pipeline_pb2.PipelineDescription) -> pipeline_module.Pipeline:
-        id = protobuf_pipeline.id
+        pipeline_id = protobuf_pipeline.id
         # source
         # created
         context = PipelineDescription.proto_pipeline_context_enum_to_pipeline_context_enum(protobuf_pipeline.context)
         name = protobuf_pipeline.name
         description = protobuf_pipeline.description
         # TODO: users field (optional)
-        pipeline = pipeline_module.Pipeline(pipeline_id=id, context=context, name=name, description=description)
+        pipeline = pipeline_module.Pipeline(pipeline_id=pipeline_id, context=context, name=name, description=description)
 
         # add inputs to pipeline
         for input in protobuf_pipeline.inputs:

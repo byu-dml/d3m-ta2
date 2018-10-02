@@ -34,6 +34,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_processes: typing.Dict[str, SearchProcess] = {}
         self.work_queue = queue.PriorityQueue()
         self.search_workers: typing.List[SearchWorker] = []
+        self.has_loaded_primitives = False
 
         for i in range(num_workers):
             worker_thread = SearchWorker(search_queue=self.work_queue,
@@ -87,12 +88,20 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         problem = request.problem.problem
         if not hasattr(problem, 'id') or problem.id == '':
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
-        search_solutions_request = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
+
+        search_solutions_request: search_solutions_wrapper.SearchSolutionsRequest = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
         search_id = str(uuid.uuid4())
-        if search_solutions_request.time_bound > 0:
-            timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
-            timer.start()
         search_process = SearchProcess(search_id, search_solutions_request)
+        if search_solutions_request.is_pipeline_fully_specified():
+            search_solutions_request.pipeline.check(allow_placeholders=False)
+            search_process.should_stop = True
+            search_solution = SearchSolution()
+            search_solution.complete(search_solutions_request.pipeline)
+            search_process.add_search_solution(search_solution)
+        else:
+            if search_solutions_request.time_bound > 0:
+                timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
+                timer.start()
         self.add_search_process(search_process)
         return core_pb2.SearchSolutionsResponse(search_id=search_id)
 
@@ -104,7 +113,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_process = self.search_processes[search_id]
         sent_solutions: typing.Set[str] = set()
         for solution in list(search_process.solutions.values()):
-            yield solution.get_protobuf_search_solution()
+            yield solution.get_search_solutions_result()
             solution_id = solution.id_
             sent_solutions.add(solution_id)
             logging.debug(f'Sent solution {solution_id}')
@@ -112,7 +121,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             time.sleep(1)
             for solution in list(search_process.solutions.values()):
                 if solution.id_ not in sent_solutions:
-                    yield solution.get_protobuf_search_solution()
+                    yield solution.get_search_solutions_result()
                     solution_id = solution.id_
                     sent_solutions.add(solution_id)
                     logging.debug(f'Sent solution {solution_id}')
@@ -185,12 +194,13 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def ListPrimitives(self, request: core_pb2.ListPrimitivesRequest, context) -> core_pb2.ListPrimitivesResponse:
         logging.debug(f'Received ListPrimitivesRequest:\n{request}')
-        primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
         primitives: typing.List[pipeline_pb2.primitive__pb2.Primitive] = []
 
-        if len(primitive_bases) == 0:
+        if not self.has_loaded_primitives:
             index.load_all()
-            primitive_bases = index.get_loaded_primitives()
+            self.has_loaded_primitives = True
+
+        primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
         for primitive_base in primitive_bases:
             metadata = primitive_base.metadata.to_json_structure()
             primitive = Primitive.get_primitive_from_json(metadata)

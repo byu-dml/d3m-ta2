@@ -5,6 +5,7 @@ import time
 import typing
 from search_process import SearchProcess
 from search_solution import SearchSolution
+from d3m.metadata import pipeline as pipeline_module
 
 
 class SearchWorker(threading.Thread):
@@ -45,7 +46,7 @@ class SearchWorker(threading.Thread):
             self._update_search_solution(search_solution)
             search_solution.start_running()
             time.sleep(3)
-            search_solution.complete()
+            search_solution.complete(pipeline=pipeline_module.Pipeline(context='TESTING'))
 
         logging.info(f'Finished search {self.search_process.search_id}')
         self._mark_search_complete()
