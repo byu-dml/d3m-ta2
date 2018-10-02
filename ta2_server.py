@@ -89,7 +89,13 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         if not hasattr(problem, 'id') or problem.id == '':
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "no problem specified")
 
-        search_solutions_request: search_solutions_wrapper.SearchSolutionsRequest = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(request)
+        search_id = self.handle_search_solutions_request(request)
+
+        return core_pb2.SearchSolutionsResponse(search_id=search_id)
+
+    def handle_search_solutions_request(self, request: core_pb2.SearchSolutionsRequest) -> str:
+        search_solutions_request: search_solutions_wrapper.SearchSolutionsRequest = search_solutions_wrapper.SearchSolutionsRequest.get_from_protobuf(
+            request)
         search_id = str(uuid.uuid4())
         search_process = SearchProcess(search_id, search_solutions_request)
         if search_solutions_request.is_pipeline_fully_specified():
@@ -103,7 +109,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
                 timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
                 timer.start()
         self.add_search_process(search_process)
-        return core_pb2.SearchSolutionsResponse(search_id=search_id)
+        return search_id
 
     def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context) -> core_pb2.GetSearchSolutionsResultsResponse:
         logging.debug(f'Received GetSearchSolutionsRequest:\n{request}')
