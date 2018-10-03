@@ -44,7 +44,7 @@ class SearchSolutionsRequest:
     def is_pipeline_fully_specified(self) -> bool:
         if self.pipeline is None:
             return False
-        has_no_free_hyperparams = len(self.pipeline.get_free_hyperparams()) == 0
+        has_no_free_hyperparams = sum([len(free) for free in self.pipeline.get_free_hyperparams()]) == 0
         has_no_placeholders = not self.pipeline.has_placeholder()
         return has_no_free_hyperparams and has_no_placeholders
 

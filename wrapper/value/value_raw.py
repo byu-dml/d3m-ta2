@@ -21,13 +21,17 @@ class ValueRaw:
         elif isinstance(self.raw, bytes):
             value_raw = value_pb2.ValueRaw(bytes=self.raw)
         elif isinstance(self.raw, list):
-            value_list_items: typing.List[value_pb2.ValueRaw] = [temp_raw.to_protobuf() for temp_raw in self.raw]
-            value_list: value_pb2.ValueList = value_pb2.ValueList(items=value_list_items)
+            value_raw_list = []
+            for value in self.raw:
+                temp_value_raw = ValueRaw(raw=value)
+                value_raw_list.append(temp_value_raw.to_protobuf())
+            value_list: value_pb2.ValueList = value_pb2.ValueList(items=value_raw_list)
             value_raw = value_pb2.ValueRaw(list=value_list)
         elif isinstance(self.raw, dict):
             value_dict_items: typing.Dict[str, value_pb2.ValueRaw] = {}
             for key, value in self.raw.items():
-                value_dict_items[key] = value.to_protobuf()
+                temp_value_raw = ValueRaw(raw=value)
+                value_dict_items[key] = temp_value_raw.to_protobuf()
             value_dict: value_pb2.ValueDict = value_pb2.ValueDict(items=value_dict_items)
             value_raw = value_pb2.ValueRaw(dict=value_dict)
 
@@ -39,9 +43,9 @@ class ValueRaw:
         if value_name == 'null':
             value = None
         elif value_name == 'list':
-            value = protobuf_value_raw.list.items
+            value = [ValueRaw.from_protobuf(v) for v in protobuf_value_raw.list.items]
         elif value_name == 'dict':
-            value = protobuf_value_raw.dict.items
+            value = [ValueRaw.from_protobuf(v) for v in protobuf_value_raw.dict.items]
         else:
             value = getattr(protobuf_value_raw, value_name)
         return value

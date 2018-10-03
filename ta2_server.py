@@ -69,8 +69,10 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             self.search_processes[search_id].should_stop = True
 
     def add_search_process(self, search_process: SearchProcess) -> None:
-        logging.info(f'Inserting {search_process.search_id} into queue and search_processes')
-        self.work_queue.put(search_process)
+        if not search_process.should_stop:
+            logging.info(f'Inserting {search_process.search_id} into queue')
+            self.work_queue.put(search_process)
+        logging.info(f'Inserting {search_process.search_id} into search_processes')
         self.search_processes[search_process.search_id] = search_process
 
     def find_search_solution(self, solution_id: str) -> typing.Optional[SearchSolution]:
