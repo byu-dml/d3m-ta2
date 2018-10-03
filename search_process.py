@@ -2,7 +2,7 @@ import typing
 from search_solution import SearchSolution
 import uuid
 from generated_grpc import core_pb2
-from wrapper.progress import Progress
+from wrapper.core.progress import Progress
 
 
 class SearchProcess(object):

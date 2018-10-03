@@ -14,11 +14,10 @@ import threading
 from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from search_process import SearchProcess
 from config import Config
-import wrapper.search_solutions_request as search_solutions_wrapper
+import wrapper.core.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
 from search_solution import SearchSolution
 from wrapper.primitive.primitive import Primitive
-from d3m.metadata import pipeline as pipeline_module
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'

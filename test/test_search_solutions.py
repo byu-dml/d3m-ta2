@@ -2,7 +2,7 @@ import pytest
 import generated_grpc.problem_pb2 as grpc_problem
 from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2
 from d3m.metadata import pipeline as pipeline_module
-from wrapper.pipeline_description import PipelineDescription
+from factory.pipeline_description_factory import PipelineDescriptionFactory
 
 
 class TestSearchSolutions:
@@ -54,7 +54,7 @@ class TestSearchSolutions:
 
     @staticmethod
     def test_fully_specified_pipelines(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline_fully_specified: pipeline_module.Pipeline, sick_problem: grpc_problem.ProblemDescription):
-        pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescription.pipeline_to_protobuf_pipeline(random_forest_pipeline_fully_specified)
+        pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescriptionFactory.to_protobuf_pipeline_description(random_forest_pipeline_fully_specified)
         request = core_pb2.SearchSolutionsRequest(version=protocol_version,
                                                   template=pipeline_description,
                                                   problem=sick_problem

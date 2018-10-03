@@ -1,6 +1,6 @@
 import generated_grpc.problem_pb2 as grpc_problem
-from wrapper.problem import Problem
-from wrapper.problem_input import ProblemInput
+from wrapper.problem.problem import Problem
+from wrapper.problem.problem_input import ProblemInput
 from d3m.metadata import problem as problem_module
 
 

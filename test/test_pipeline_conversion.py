@@ -1,6 +1,5 @@
-from wrapper import pipeline_description
+from factory import pipeline_description_factory
 from d3m.metadata import pipeline as pipeline_module
-from wrapper import pipeline_description
 from generated_grpc import pipeline_pb2
 
 
@@ -8,8 +7,8 @@ class TestPipelineConversion:
 
     @staticmethod
     def test_pipeline_to_protobuf_to_pipeline(random_forest_pipeline: pipeline_module.Pipeline):
-        protobuf_pipeline: pipeline_pb2.PipelineDescription = pipeline_description.PipelineDescription.pipeline_to_protobuf_pipeline(random_forest_pipeline)
-        converted_pipeline: pipeline_module.Pipeline = pipeline_description.PipelineDescription.get_pipeline_from_protobuf_pipeline(protobuf_pipeline)
+        protobuf_pipeline: pipeline_pb2.PipelineDescription = pipeline_description_factory.PipelineDescriptionFactory.to_protobuf_pipeline_description(random_forest_pipeline)
+        converted_pipeline: pipeline_module.Pipeline = pipeline_description_factory.PipelineDescriptionFactory.from_protobuf_pipeline_description(protobuf_pipeline)
         assert TestPipelineConversion.equal(random_forest_pipeline, converted_pipeline)
 
     @staticmethod

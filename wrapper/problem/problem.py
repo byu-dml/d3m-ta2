@@ -1,5 +1,5 @@
 import generated_grpc.problem_pb2 as grpc_problem
-from wrapper.problem_performance_metric import ProblemPerformanceMetric
+from wrapper.problem.problem_performance_metric import ProblemPerformanceMetric
 
 
 # from d3m.metadata.problem import TaskSubtype, TaskType

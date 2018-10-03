@@ -1,8 +1,8 @@
 from d3m.metadata import pipeline as pipeline_module
 import typing
-from wrapper.primitive.container_argument import ContainerArgument
+from wrapper.pipeline.container_argument import ContainerArgument
 from generated_grpc import pipeline_pb2
-from wrapper.primitive.data_argument import DataArgument
+from wrapper.pipeline.data_argument import DataArgument
 
 
 class PrimitiveStepArgumentsFactory:

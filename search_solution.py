@@ -1,5 +1,5 @@
 from generated_grpc import core_pb2
-from wrapper.progress import Progress
+from wrapper.core.progress import Progress
 from d3m.metadata import pipeline as pipeline_module
 import uuid
 

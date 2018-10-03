@@ -1,6 +1,5 @@
 import generated_grpc.problem_pb2 as grpc_problem
-from wrapper.problem_target import ProblemTarget
-from pprint import pprint
+from wrapper.problem.problem_target import ProblemTarget
 
 
 class ProblemInput:

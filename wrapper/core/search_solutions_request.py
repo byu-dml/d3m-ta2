@@ -1,6 +1,6 @@
-from wrapper.pipeline_description import PipelineDescription
+from factory.pipeline_description_factory import PipelineDescriptionFactory
 import generated_grpc.core_pb2 as core
-from wrapper.problem_description import ProblemDescription
+from wrapper.problem.problem_description import ProblemDescription
 import constants
 from d3m.metadata import pipeline as pipeline_module
 
@@ -26,7 +26,7 @@ class SearchSolutionsRequest:
 
         if has_template:
             pipeline_description_protobuf = search_solutions_request.protobuf_search_solutions_request.template
-            search_solutions_request.pipeline = PipelineDescription.get_pipeline_from_protobuf_pipeline(
+            search_solutions_request.pipeline = PipelineDescriptionFactory.from_protobuf_pipeline_description(
                 pipeline_description_protobuf)
         problem = protobuf_search_solutions_request.problem
         search_solutions_request.problem_description = ProblemDescription.get_from_protobuf(problem)
