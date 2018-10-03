@@ -101,10 +101,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_id = str(uuid.uuid4())
         search_process = SearchProcess(search_id, search_solutions_request)
         if search_solutions_request.is_pipeline_fully_specified():
-            search_solutions_request.pipeline.check(allow_placeholders=False)
+            pipeline = search_solutions_request.pipeline
+            pipeline.check(allow_placeholders=False)
             search_process.should_stop = True
             search_solution = SearchSolution()
-            search_solution.complete(search_solutions_request.pipeline)
+            search_solution.complete(pipeline)
             search_process.add_search_solution(search_solution)
         else:
             if search_solutions_request.time_bound > 0:
