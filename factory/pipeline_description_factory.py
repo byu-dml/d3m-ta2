@@ -7,6 +7,9 @@ import datetime
 from util.timestamp_util import TimestampUtil
 from factory.primitive_step_hyperparams_factory import PrimitiveStepHyperparamFactory
 from factory.primitive_step_arguments_factory import PrimitiveStepArgumentsFactory
+from factory.pipeline_inputs_factory import PipelineInputsFactory
+from factory.pipeline_outputs_factory import PipelineOutputsFactory
+from factory.pipeline_steps_factory import PipelineStepsFactory
 
 
 class PipelineDescriptionFactory:
@@ -23,10 +26,9 @@ class PipelineDescriptionFactory:
         pipeline_name = pipeline.name
         pipeline_description = pipeline.description
 
-        pipeline_inputs: typing.List[dict] = PipelineDescriptionFactory.get_pipeline_inputs(pipeline)
-        pipeline_outputs = PipelineDescriptionFactory.get_pipeline_outputs(pipeline)
-        pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = PipelineDescriptionFactory.get_pipeline_steps(
-            pipeline)
+        pipeline_inputs: typing.List[pipeline_pb2.PipelineDescriptionInput] = PipelineInputsFactory.to_protobuf_inputs(pipeline.inputs)
+        pipeline_outputs: typing.List[pipeline_pb2.PipelineDescriptionOutput] = PipelineOutputsFactory.to_protobuf_outputs(pipeline.outputs)
+        pipeline_steps: typing.List[pipeline_pb2.PipelineDescriptionStep] = PipelineStepsFactory.to_protobuf_steps(pipeline.steps)
 
         return pipeline_pb2.PipelineDescription(id=pipeline_id,
                                                 created=pipeline_created,
@@ -47,58 +49,6 @@ class PipelineDescriptionFactory:
             pipeline_module.PipelineContext.PRODUCTION: pipeline_pb2.PRODUCTION
         }
         return switcher.get(context, pipeline_pb2.PIPELINE_CONTEXT_UNKNOWN)
-
-    @staticmethod
-    def get_pipeline_outputs(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionOutput]:
-        outputs = []
-        for output in pipeline.outputs:
-            description_output = pipeline_pb2.PipelineDescriptionOutput(name=output['name'], data=output['data'])
-            outputs.append(description_output)
-        return outputs
-
-    @staticmethod
-    def get_pipeline_inputs(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionInput]:
-        pipeline_description_inputs = []
-        for input_ in pipeline.inputs:
-            input_name = input_['name']
-            description_input = pipeline_pb2.PipelineDescriptionInput(name=input_name)
-            pipeline_description_inputs.append(description_input)
-
-        return pipeline_description_inputs
-
-    @staticmethod
-    def get_pipeline_steps(pipeline: pipeline_module.Pipeline) -> typing.List[pipeline_pb2.PipelineDescriptionStep]:
-        steps = []
-        for step in pipeline.steps:
-            pipeline_description_step = None
-            if isinstance(step, pipeline_module.PrimitiveStep):
-                primitive_pipeline_description_step = PipelineDescriptionFactory.get_primitive_pipeline_description_step(step)
-                pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=primitive_pipeline_description_step)
-            steps.append(pipeline_description_step)
-        return steps
-
-    @staticmethod
-    def get_primitive_pipeline_description_step(step):
-        primitive_description = step.primitive_description
-        primitive = Primitive.get_primitive_from_json(primitive_description)
-        primitive_step_arguments = PrimitiveStepArgumentsFactory.to_protobuf_arguments(step.arguments)
-        primitive_step_outputs = PipelineDescriptionFactory.get_primitive_step_outputs(step.outputs)
-        primitive_step_hyperparams = PrimitiveStepHyperparamFactory.to_protobuf_hyperparams(step.hyperparams)
-        # TODO: users field (optional)
-        primitive_pipeline_description_step = pipeline_pb2.PrimitivePipelineDescriptionStep(primitive=primitive,
-                                                                                   arguments=primitive_step_arguments,
-                                                                                   outputs=primitive_step_outputs,
-                                                                                   hyperparams=primitive_step_hyperparams
-                                                                                   )
-        return primitive_pipeline_description_step
-
-    @staticmethod
-    def get_primitive_step_outputs(outputs: typing.List[str]) -> typing.List[pipeline_pb2.StepOutput]:
-        primitive_step_outputs = []
-        for output in outputs:
-            primitive_step_output = pipeline_pb2.StepOutput(id=output)
-            primitive_step_outputs.append(primitive_step_output)
-        return primitive_step_outputs
 
     @staticmethod
     def get_created_protobuf(pipeline: pipeline_module.Pipeline) -> Timestamp:
