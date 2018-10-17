@@ -12,5 +12,9 @@ class TimestampUtil:
         return created
 
     @staticmethod
+    def from_proto_timestamp(created: Timestamp) -> datetime.datetime:
+        return created.ToDatetime()
+
+    @staticmethod
     def get_current_proto_timestamp() -> Timestamp:
         return Timestamp()

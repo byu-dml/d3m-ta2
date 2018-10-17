@@ -116,3 +116,14 @@ def search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str, sick_problem:
     request = core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem)
     response: core_pb2.SearchSolutionsResponse = stub.SearchSolutions(request)
     return response.search_id
+
+@pytest.fixture()
+def fully_specified_search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline_fully_specified: pipeline_module.Pipeline, sick_problem: grpc_problem.ProblemDescription) -> str:
+    request = core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem)
+    response: core_pb2.SearchSolutionsResponse = stub.SearchSolutions(request)
+    search_id = response.search_id
+    request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)
+    response: core_pb2.GetSearchSolutionsResultsResponse = stub.GetSearchSolutionsResults(request)
+    for result in response:
+        return result.solution_id
+

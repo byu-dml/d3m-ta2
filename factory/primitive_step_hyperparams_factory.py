@@ -41,8 +41,10 @@ class PrimitiveStepHyperparamFactory:
         return protobuf_hyperparams
 
     @staticmethod
-    def from_protobuf_hyperparams(protobuf_hyperparams: typing.Dict[str, pipeline_pb2.PrimitiveStepHyperparameter], step: pipeline_module.PrimitiveStep) -> None:
+    def from_protobuf_hyperparams(protobuf_hyperparams: typing.Dict[str, pipeline_pb2.PrimitiveStepHyperparameter]) -> typing.List[dict]:
+        hyperparams: typing.List[dict] = []
         for name, protobuf_hyperparam in protobuf_hyperparams.items():
+            hyperparam = {}
             argument_type_str = protobuf_hyperparam.WhichOneof('argument')
             argument_type = pipeline_module.ArgumentType[argument_type_str.upper()]
             if argument_type_str == 'container':
@@ -57,6 +59,8 @@ class PrimitiveStepHyperparamFactory:
                 data = protobuf_hyperparam.data_set.data
             elif argument_type_str == 'primitive_set':
                 data = protobuf_hyperparam.primitive_set.data
-            step.add_hyperparameter(name=name, argument_type=argument_type, data=data)
-
-
+            hyperparam['name'] = name
+            hyperparam['argument_type'] = argument_type
+            hyperparam['data'] = data
+            hyperparams.append(hyperparam)
+        return hyperparams

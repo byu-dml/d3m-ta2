@@ -11,3 +11,12 @@ class StepOutputsFactory:
             protobuf_output = pipeline_pb2.StepOutput(id=output_str)
             protobuf_outputs.append(protobuf_output)
         return protobuf_outputs
+
+    @staticmethod
+    def from_protobuf(protobuf_outputs: typing.List[pipeline_pb2.StepOutput]) -> typing.List[str]:
+        outputs = []
+        for protobuf_output in protobuf_outputs:
+            output = protobuf_output.id
+            outputs.append(output)
+        return outputs
+

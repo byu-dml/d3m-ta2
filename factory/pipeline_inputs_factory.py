@@ -13,9 +13,9 @@ class PipelineInputsFactory:
             protobuf_pipeline_description_inputs.append(protobuf_pipeline_description_input)
         return protobuf_pipeline_description_inputs
 
-    # @staticmethod
-    # def from_protobuf_inputs(inputs: typing.List[pipeline_pb2.PipelineDescriptionInput]) -> typing.List[dict]:
-    #     pipeline_description_inputs = []
-    #     for input in inputs:
-    #         pipeline_description_input = input.name
-    #
+    @staticmethod
+    def from_protobuf_inputs(protobuf_inputs: typing.List[pipeline_pb2.PipelineDescriptionInput]) -> typing.List[str]:
+        pipeline_inputs = []
+        for protobuf_input in protobuf_inputs:
+            pipeline_inputs.append(protobuf_input.name)
+        return pipeline_inputs

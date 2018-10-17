@@ -1,22 +1,34 @@
-from generated_grpc import pipeline_pb2
+from generated_grpc import primitive_pb2
+import typing
 
 
 class Primitive:
 
-    @staticmethod
-    def get_primitive_from_json(json_description: dict) -> pipeline_pb2.primitive__pb2.Primitive:
-        id_ = json_description['id']
-        version = json_description['version']
-        python_path = json_description['python_path']
-        name = json_description['name']
-        digest = None
-        if 'digest' in json_description:
-            digest = json_description['digest']
+    def __init__(self, primitive_description: typing.Dict):
+        self.id_ = primitive_description['id']
+        self.version = primitive_description['version']
+        self.python_path = primitive_description['python_path']
+        self.name = primitive_description['name']
+        self.digest = None
+        if 'digest' in primitive_description:
+            self.digest = primitive_description['digest']
 
-        primitive = pipeline_pb2.primitive__pb2.Primitive(id=id_,
-                                                          version=version,
-                                                          python_path=python_path,
-                                                          name=name,
-                                                          digest=digest
-                                                          )
+    def to_protobuf(self) -> primitive_pb2.Primitive:
+        primitive = primitive_pb2.Primitive(id=self.id_,
+                                            version=self.version,
+                                            python_path=self.python_path,
+                                            name=self.name,
+                                            digest=self.digest
+                                            )
         return primitive
+
+    @staticmethod
+    def from_protobuf(protobuf_primitive: primitive_pb2.Primitive) -> typing.Dict:
+        primitive_description = {}
+        primitive_description['id'] = protobuf_primitive.id
+        primitive_description['version'] = protobuf_primitive.version
+        primitive_description['python_path'] = protobuf_primitive.python_path
+        primitive_description['name'] = protobuf_primitive.name
+        primitive_description['digest'] = protobuf_primitive.digest
+        return primitive_description
+

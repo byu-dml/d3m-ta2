@@ -14,10 +14,23 @@ class PipelineStepsFactory:
             if isinstance(step, pipeline_module.PrimitiveStep):
                 protobuf_primitive_pipeline_description_step = PrimitivePipelineStepFactory.to_protobuf(step)
                 protobuf_pipeline_description_step = pipeline_pb2.PipelineDescriptionStep(primitive=protobuf_primitive_pipeline_description_step)
-            #TODO: implement for subpipeline and placeholder steps
             elif isinstance(step, pipeline_module.SubpipelineStep):
                 pass
             elif isinstance(step, pipeline_module.PlaceholderStep):
                 pass
             protobuf_pipeline_description_steps.append(protobuf_pipeline_description_step)
         return protobuf_pipeline_description_steps
+
+    @staticmethod
+    def from_protobuf_steps(protobuf_steps: typing.List[pipeline_pb2.PipelineDescriptionStep]) -> typing.List[pipeline_module.StepBase]:
+        pipeline_steps = []
+        for protobuf_step in protobuf_steps:
+            if protobuf_step.WhichOneof('step') == 'primitive':
+                step = PrimitivePipelineStepFactory.from_protobuf(protobuf_step.primitive)
+            elif protobuf_step.WhichOneof('step') == 'pipeline':
+                pass
+            elif protobuf_step.WhichOneof('step') == 'placeholder':
+                pass
+            pipeline_steps.append(step)
+        return pipeline_steps
+

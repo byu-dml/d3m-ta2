@@ -211,7 +211,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         primitive_bases: typing.List[base.PrimitiveBase] = index.get_loaded_primitives()
         for primitive_base in primitive_bases:
             metadata = primitive_base.metadata.to_json_structure()
-            primitive = Primitive.get_primitive_from_json(metadata)
+            primitive = Primitive(metadata).to_protobuf()
             primitives.append(primitive)
 
         return core_pb2.ListPrimitivesResponse(primitives=primitives)
