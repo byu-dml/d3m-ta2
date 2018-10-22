@@ -13,6 +13,17 @@ Compose is a way to more easily run docker containers than the `docker run` comm
   * The datasets can be accessed from inside the container at `/datasets`
   * `TA2=` should point to where you have cloned the d3m-ta2 project. It can be accessed from inside of the container at `/d3m-ta2`
 * Copy `config.py.example` to `config.py` and replace any variables you would like to change
+#### Nvidia Runtime For Docker
+* If you want to utilize GPUs from within the ta2 docker container, you will need the Nvidia docker runtime installed
+  * [Install Instructions](https://github.com/NVIDIA/nvidia-docker#quickstart)
+  * You may need to upgrade your docker version ([instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/))
+* Uncomment following lines in the docker-compose file
+```dockerfile
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+```
+* Run `nvidia-smi` from inside of the container to see if this worked
 
 ### Running Local D3M Runtime
 * Option 1:

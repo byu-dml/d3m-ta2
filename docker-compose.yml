@@ -1,4 +1,4 @@
-version: '3'
+version: '2.3'
 services:
   d3m:
     build: .
@@ -6,6 +6,9 @@ services:
     stdin_open: true
     tty: true
     entrypoint: /bin/bash
+#    runtime: nvidia
+#    environment:
+#      - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - ${VOLUMES}:/volumes
       - ${DATASETS}:/datasets
