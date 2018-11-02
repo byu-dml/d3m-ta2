@@ -32,6 +32,6 @@ class TestFullySpecifiedRun:
 
 
     @staticmethod
-    def test_fully_specified_pipeline_run(fully_specified_search_id: str):
-        assert False
-        assert isinstance(fully_specified_search_id, str)
+    def test_fully_specified_pipeline_run(solution_id_fully_specified):
+        # assert False
+        assert isinstance(solution_id_fully_specified, str)

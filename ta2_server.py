@@ -18,6 +18,8 @@ import wrapper.core.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
 from search_solution import SearchSolution
 from wrapper.primitive.primitive import Primitive
+from d3m.runtime import Runtime
+from d3m.container.dataset import Dataset, D3MDatasetLoader
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _TA2_VERSION = '1.0'
@@ -78,7 +80,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         for search_id, search_process in self.search_processes.items():
             if solution_id in search_process.solutions:
                 return search_process.solutions[solution_id]
-
         return None
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
@@ -178,7 +179,10 @@ class CoreSession(core_pb2_grpc.CoreServicer):
 
     def FitSolution(self, request, context):
         logging.debug(f'Received FitSolutionRequest:\n{request}')
-        return core_pb2.FitSolutionResponse()
+        solution = self.find_search_solution(request.solution_id)
+        request_id = str(uuid.uuid4())
+        solution.fit(request.inputs, request_id)
+        return core_pb2.FitSolutionResponse(request_id=request_id)
 
     def GetFitSolutionResults(self, request, context):
         logging.debug(f'Received GetFitSolutionResultsRequest:\n{request}')

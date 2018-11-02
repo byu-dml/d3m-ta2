@@ -1,11 +1,12 @@
 import pytest
 import grpc
 import generated_grpc.problem_pb2 as grpc_problem
-from generated_grpc import core_pb2_grpc, core_pb2
+from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2, value_pb2
 from d3m import runtime
 from d3m.metadata import pipeline as pipeline_module
 from config import Config
 from wrapper.problem.problem_description import ProblemDescription
+from factory.pipeline_description_factory import PipelineDescriptionFactory
 import typing
 import ta2_server
 
@@ -118,12 +119,24 @@ def search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str, sick_problem:
     return response.search_id
 
 @pytest.fixture()
-def fully_specified_search_id(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline_fully_specified: pipeline_module.Pipeline, sick_problem: grpc_problem.ProblemDescription) -> str:
-    request = core_pb2.SearchSolutionsRequest(version=protocol_version, problem=sick_problem)
+def solution_id_fully_specified(stub: core_pb2_grpc.CoreStub, protocol_version: str, random_forest_pipeline_fully_specified: pipeline_module.Pipeline, sick_problem: grpc_problem.ProblemDescription) -> str:
+    pipeline_description: pipeline_pb2.PipelineDescription = PipelineDescriptionFactory.to_protobuf_pipeline_description(
+                                                                                        random_forest_pipeline_fully_specified)
+    request = core_pb2.SearchSolutionsRequest(version=protocol_version, template=pipeline_description, problem=sick_problem)
     response: core_pb2.SearchSolutionsResponse = stub.SearchSolutions(request)
     search_id = response.search_id
     request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)
     response: core_pb2.GetSearchSolutionsResultsResponse = stub.GetSearchSolutionsResults(request)
     for result in response:
-        return result.solution_id
+        solution_id = result.solution_id
+    dataset_uri_str = "file:/datasets/seed_datasets_current/185_baseball/185_baseball_dataset/datasetDoc.json"
+    dataset_uri = value_pb2.Value(dataset_uri=dataset_uri_str)
+    request = core_pb2.FitSolutionRequest(solution_id=solution_id, inputs=[dataset_uri])
+    response = stub.FitSolution(request)
+    print('GOT PAST IT')
+    request_id = response.request_id
+    request = core_pb2.GetFitSolutionResultsRequest(request_id=request_id)
+    response = stub.GetFitSolutionResults(request)
+    for result in response:
+        fitted_solution_id = result.fitted_solution_id
 
