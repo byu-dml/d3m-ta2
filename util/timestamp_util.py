@@ -18,3 +18,7 @@ class TimestampUtil:
     @staticmethod
     def get_current_proto_timestamp() -> Timestamp:
         return Timestamp()
+
+    @staticmethod
+    def from_string(string) -> Timestamp:
+        return Timestamp().FromJsonString(string)

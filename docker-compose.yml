@@ -1,7 +1,9 @@
-version: '2.3'
+version: '2.4'
 services:
   d3m:
-    build: .
+    build:
+      context: .
+    shm_size: '2gb'
     container_name: ta2
     stdin_open: true
     tty: true

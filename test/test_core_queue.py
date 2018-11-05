@@ -7,12 +7,9 @@ class TestCoreQueue:
 
     @staticmethod
     def test_queue_ordering(no_worker_core_session):
-        search_solutions_request = core_pb2.SearchSolutionsRequest(priority=0)
-        low_priority_search = SearchProcess(uuid.uuid4(), search_solutions_request)
-        search_solutions_request = core_pb2.SearchSolutionsRequest(priority=1)
-        high_priority_search = SearchProcess(uuid.uuid4(), search_solutions_request)
-        search_solutions_request = core_pb2.SearchSolutionsRequest(priority=100)
-        highest_priority_search = SearchProcess(uuid.uuid4(), search_solutions_request)
+        low_priority_search = SearchProcess(str(uuid.uuid4()), priority=0)
+        high_priority_search = SearchProcess(str(uuid.uuid4()), priority=1)
+        highest_priority_search = SearchProcess(str(uuid.uuid4()), priority=100)
 
         work_queue = no_worker_core_session.work_queue
         assert len(no_worker_core_session.search_processes) == 0, 'There should be no search processes yet'
