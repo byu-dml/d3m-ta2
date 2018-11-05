@@ -18,5 +18,22 @@ services:
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     network_mode: "bridge"
+    links:
+      - redis
+#    mem_limit: 40G
+  redis:
+    image: 'redislabs/rejson:latest'
+    container_name: ta2-redis
+    environment:
+    # ALLOW_EMPTY_PASSWORD is recommended only for development.
+    - ALLOW_EMPTY_PASSWORD=yes
+#    - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    labels:
+      kompose.service.type: nodeport
+    ports:
+    - '6379:6379'
+    network_mode: "bridge"
+#    volumes:
+#    - 'redis_data:/bitnami/redis'
       
 
