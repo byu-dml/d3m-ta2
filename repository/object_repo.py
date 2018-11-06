@@ -1,61 +1,69 @@
-import redis
 import typing
 import logging
-import json
+import pymongo
+from pymongo.collection import InsertOneResult, DeleteResult, Cursor
 
 from search_process import SearchProcess
 from search_solution import SearchSolution
-
-REDIS_HOST = 'ta2-redis'
-REDIS_PORT = 6379
 
 
 class ObjectRepo:
 
     def __init__(self):
-        self.client = redis.Redis(
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            password='')
+        self.client = pymongo.MongoClient('ta2-mongodb', 27017)
+        self.search_processes = self.client['search_processes']['search_processes']
+        self.search_solutions = self.client['search_solutions']['search_solutions']
 
-    def save_search_process(self, search_process: SearchProcess) -> None:
+    def save_search_process(self, search_process: SearchProcess) -> typing.Union[SearchProcess, InsertOneResult]:
         json_structure = search_process.to_json_structure()
-        self.client.execute_command('JSON.SET', search_process.search_id, '.', json.dumps(json_structure))
+        if search_process.mongo_id is not None:
+            query = {'_id': search_process.mongo_id}
+            result = self.search_processes.replace_one(query, json_structure, upsert=True)
+        else:
+            result = self.search_processes.insert_one(json_structure)
+
+        return result
 
     def get_search_process(self, search_id) -> typing.Optional[SearchProcess]:
         search_process = None
-        json_structure = None
-        try:
-            json_structure = json.loads(self._get_json(search_id))
-            if json_structure is not None:
-                search_process = SearchProcess.from_json_structure(json_structure)
-        except Exception as e:
-            logging.warning(f'Failed to deserialize search process {search_id} {json_structure} {str(e)}')
-            pass
+        result = self.search_processes.find_one({'search_id': search_id})
+        if result is not None:
+            search_process = SearchProcess.from_json_structure(result)
+        logging.debug(f'Loaded process {search_process.to_json_structure()}')
+
         return search_process
 
-    def save_search_solution(self, search_solution: SearchSolution) -> None:
+    def save_search_solution(self, search_solution: SearchSolution) -> typing.Union[SearchSolution, InsertOneResult]:
         json_structure = search_solution.to_json_structure()
-        self.client.execute_command('JSON.SET', search_solution.id_, '.', json.dumps(json_structure))
+        if search_solution.mongo_id is not None:
+            query = {'_id': search_solution.mongo_id}
+            result = self.search_solutions.replace_one(query, json_structure, upsert=True)
+        else:
+            result = self.search_solutions.insert_one(json_structure)
+
+        return result
 
     def get_search_solution(self, search_solution_id) -> typing.Optional[SearchSolution]:
+        result = self.search_solutions.find_one({'id': search_solution_id})
         search_solution = None
-        json_structure = None
-        try:
-            json_structure = json.loads(self._get_json(search_solution_id))
-            if json_structure is not None:
-                search_solution = SearchSolution.from_json_structure(json_structure)
-        except Exception as e:
-            logging.warning(f'Failed to deserialize search solution {search_solution_id} {json_structure} {str(e)}')
-            pass
+        if result is not None:
+            search_solution = SearchSolution.from_json_structure(result)
 
+        logging.debug(f'Loaded solution {search_solution}')
         return search_solution
 
-    def _get_json(self, key):
-        return self.client.execute_command('JSON.GET', key)
+    def delete_search_process_and_solutions(self, search_id) -> DeleteResult:
+        query = {'search_id': search_id}
+        delete_solutions_result = self.search_solutions.delete_many(query)
+        logging.debug(f'Deleted {delete_solutions_result.deleted_count} search solutions')
+        delete_process_result: DeleteResult = self.search_processes.delete_one(query)
+        logging.debug(f'Deleted {delete_process_result.deleted_count} search processes')
 
-    def _set(self, key, object_):
-        return self.client.set(key, object_)
+        return delete_process_result
 
-    def delete(self, key):
-        return self.client.delete(key)
+    def get_all_solutions_for_search(self, search_id) -> typing.List[SearchSolution]:
+        query = {'search_id': search_id}
+        documents: Cursor = self.search_solutions.find(query)
+        search_solutions = [SearchSolution.from_json_structure(doc) for doc in documents]
+
+        return search_solutions

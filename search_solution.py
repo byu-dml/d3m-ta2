@@ -13,6 +13,7 @@ class SearchSolution:
         self.all_ticks: int = 0
         self.pipeline: pipeline_module.Pipeline = None
         self.search_id = search_id
+        self.mongo_id = None
 
         # Optional
         self.internal_score = None
@@ -45,6 +46,8 @@ class SearchSolution:
         }
         if self.pipeline is not None:
             json_structure['pipeline'] = self.pipeline.to_json_structure()
+        if self.mongo_id is not None:
+            json_structure['_id'] = self.mongo_id
 
         return json_structure
 
@@ -61,6 +64,8 @@ class SearchSolution:
         search_solution.pipeline = pipeline_description
         search_solution.internal_score = json_structure['internal_scores']
         search_solution.scores = json_structure['scores']
+        if '_id' in json_structure:
+            search_solution.mongo_id = json_structure['_id']
 
         return search_solution
 

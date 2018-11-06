@@ -21,7 +21,7 @@ class SearchWorker(multiprocessing.Process):
         self.search_process: SearchProcess = None
         self.interrupted: bool = False
         # self.search_processes: typing.Dict[str, SearchProcess] = search_processes
-        self.client = ObjectRepo()
+        self.db = ObjectRepo()
 
     def interrupt(self) -> None:
         logging.info('Worker interrupted')
@@ -30,14 +30,14 @@ class SearchWorker(multiprocessing.Process):
     def should_stop_searching(self) -> bool:
         if self.search_process is None:
             return True
-        self.search_process = self.client.get_search_process(self.search_process.search_id)
+        self.search_process = self.db.get_search_process(self.search_process.search_id)
         return self.search_process is not None and (self.search_process.should_stop or self.interrupted)
 
     def _update_search_solution(self, search_solution: SearchSolution) -> None:
         if self.search_process is None:
             logging.warning('No search process to add a solution to')
             return
-        self.client.save_search_solution(search_solution)
+        self.db.save_search_solution(search_solution)
 
     def search(self) -> None:
         if self.search_process is None:
@@ -56,7 +56,7 @@ class SearchWorker(multiprocessing.Process):
             time.sleep(3)
             search_solution.complete(pipeline=None)
             self._update_search_solution(search_solution)
-            self.search_process = self.client.get_search_process(self.search_process.search_id)
+            self.search_process = self.db.get_search_process(self.search_process.search_id)
             self.search_process.add_search_solution(search_solution)
             self._update_search_process()
 
@@ -69,7 +69,7 @@ class SearchWorker(multiprocessing.Process):
 
     def _update_search_process(self):
         if self.search_process is not None:
-            self.client.save_search_process(self.search_process)
+            self.db.save_search_process(self.search_process)
 
     def _remove_search_process(self) -> None:
         logging.info(f'Search {self.search_process.search_id} interrupted')

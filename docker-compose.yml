@@ -19,21 +19,17 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT}
     network_mode: "bridge"
     links:
-      - redis
+      - mongodb
 #    mem_limit: 40G
-  redis:
-    image: 'redislabs/rejson:latest'
-    container_name: ta2-redis
+  mongodb:
+    image: mongo:latest
+    container_name: "ta2-mongodb"
     environment:
-    # ALLOW_EMPTY_PASSWORD is recommended only for development.
-    - ALLOW_EMPTY_PASSWORD=yes
-#    - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
-    labels:
-      kompose.service.type: nodeport
-    ports:
-    - '6379:6379'
-    network_mode: "bridge"
+    - MONGO_DATA_DIR=/data/db
 #    volumes:
-#    - 'redis_data:/bitnami/redis'
+#    - ./data/db:/data/db
+    network_mode: "bridge"
+    ports:
+    - 27017:27017
       
 

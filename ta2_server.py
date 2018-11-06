@@ -44,7 +44,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.work_queue = m.PriorityQueue()
         self.search_workers: typing.List[SearchWorker] = []
         self.has_loaded_primitives = False
-        self.client = ObjectRepo()
+        self.db = ObjectRepo()
         # sp = SearchProcess(str(uuid.uuid4()), "")
         # self.client.set(sp.search_id, sp)
 
@@ -74,7 +74,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         logging.debug(f'Removing search {search_process.search_id}')
         self.stop_workers_search(search_process.search_id)
         self.search_processes.remove(search_process.search_id)
-        self.client.delete(search_process.search_id)
+        self.db.delete_search_process_and_solutions(search_process.search_id)
 
     def stop_workers_search(self, search_id) -> None:
         for worker in self.search_workers:
@@ -83,14 +83,14 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def stop_search(self, search_id: str) -> None:
         logging.debug(f'Stopping search {search_id}')
         self.stop_workers_search(search_id)
-        search_process: SearchProcess = self.client.get_search_process(search_id)
+        search_process: SearchProcess = self.db.get_search_process(search_id)
         if search_process is not None:
             search_process.should_stop = True
-            self.client.save_search_process(search_process)
+            self.db.save_search_process(search_process)
 
     def add_search_process(self, search_process: SearchProcess) -> None:
         logging.info(f'Inserting {search_process.search_id} into queue')
-        self.client.save_search_process(search_process)
+        self.db.save_search_process(search_process)
         logging.info(f'Inserting {search_process.search_id} into search_processes')
         self.search_processes.append(search_process.search_id)
         if not search_process.should_stop:
@@ -99,7 +99,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         # self.search_processes[search_process.search_id] = search_process
 
     def find_search_solution(self, solution_id: str) -> typing.Optional[SearchSolution]:
-        return self.client.get_search_solution(solution_id)
+        return self.db.get_search_solution(solution_id)
 
     def SearchSolutions(self, request: core_pb2.SearchSolutionsRequest, context) -> core_pb2.SearchSolutionsResponse:
         logging.debug(f'Received SearchSolutionsRequest:\n{request}')
@@ -121,12 +121,11 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         search_process = SearchProcess(search_id, search_solutions_request.priority)
         if search_solutions_request.is_pipeline_fully_specified():
             pipeline = search_solutions_request.pipeline
-            logging.debug("HERE")
             pipeline.check(allow_placeholders=False)
             search_process.should_stop = True
             search_solution = SearchSolution(search_id)
             search_solution.complete(pipeline)
-            self.client.save_search_solution(search_solution)
+            self.db.save_search_solution(search_solution)
             search_process.add_search_solution(search_solution)
         else:
             if search_solutions_request.time_bound > 0:
@@ -139,21 +138,22 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def GetSearchSolutionsResults(self, request: core_pb2.GetSearchSolutionsResultsRequest, context) -> core_pb2.GetSearchSolutionsResultsResponse:
         logging.debug(f'Received GetSearchSolutionsRequest:\n{request}')
         search_id = request.search_id
-        search_process: SearchProcess = self.client.get_search_process(search_id)
+        search_process: SearchProcess = self.db.get_search_process(search_id)
         if search_process is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.SEARCH_ID_ERROR_MESSAGE)
         sent_solutions: typing.Set[str] = set()
-        for solution_id in search_process.solutions:
-            solution = self.client.get_search_solution(solution_id)
+        solutions = self.db.get_all_solutions_for_search(search_id)
+        for solution in solutions:
             yield solution.get_search_solutions_result()
-            sent_solutions.add(solution_id)
-            logging.debug(f'Sent solution {solution_id}')
+            sent_solutions.add(solution.id_)
+            logging.debug(f'Sent solution {solution.id_}')
         while not search_process.completed and not search_process.should_stop:
             time.sleep(1)
-            search_process = self.client.get_search_process(search_process.search_id)
-            for solution_id in search_process.solutions:
+            search_process = self.db.get_search_process(search_process.search_id)
+            solutions = self.db.get_all_solutions_for_search(search_id)
+            for solution in solutions:
+                solution_id = solution.id_
                 if solution_id not in sent_solutions:
-                    solution = self.client.get_search_solution(solution_id)
                     yield solution.get_search_solutions_result()
                     sent_solutions.add(solution_id)
                     logging.debug(f'Sent solution {solution_id}')
@@ -165,7 +165,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def end_search_solutions(self, request: core_pb2.EndSearchSolutionsRequest, context) -> None:
         logging.debug(f'Received EndSearchSolutionsRequest:\n{request}')
         search_id: str = request.search_id
-        search_process = self.client.get_search_process(search_id)
+        search_process = self.db.get_search_process(search_id)
         if search_process is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.END_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         self.remove_search_process(search_process)
@@ -173,7 +173,7 @@ class CoreSession(core_pb2_grpc.CoreServicer):
     def StopSearchSolutions(self, request: core_pb2.StopSearchSolutionsRequest, context) -> core_pb2.StopSearchSolutionsResponse:
         logging.debug(f'Received StopSearchSolutionsRequest:\n{request}')
         search_id = request.search_id
-        search_process = self.client.get_search_process(search_id)
+        search_process = self.db.get_search_process(search_id)
         if search_process is None:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, constants.STOP_SEARCH_SOLUTIONS_ERROR_MESSAGE)
         self.stop_search(search_id)

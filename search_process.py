@@ -14,6 +14,7 @@ class SearchProcess(object):
         self.completed: bool = False
         self.progress: Progress = Progress()
         self.should_stop = False
+        self.mongo_id = None
 
     def __lt__(self, other):
         return self.priority > other.priority
@@ -22,7 +23,7 @@ class SearchProcess(object):
         self.solutions.append(search_solution.id_)
 
     def to_json_structure(self) -> typing.Dict:
-        return {
+        json_structure = {
             'search_id': self.search_id,
             'priority': self.priority,
             'solutions': self.solutions,
@@ -30,6 +31,9 @@ class SearchProcess(object):
             'progress': self.progress.to_json_structure(),
             'should_stop': self.should_stop
         }
+        if self.mongo_id is not None:
+            json_structure['_id'] = self.mongo_id
+        return json_structure
 
     @staticmethod
     def from_json_structure(json_structure):
@@ -38,6 +42,8 @@ class SearchProcess(object):
         search_process.progress = Progress.from_json_structure(json_structure['progress'])
         search_process.solutions = json_structure['solutions']
         search_process.should_stop = json_structure['should_stop']
+        if '_id' in json_structure:
+            search_process.mongo_id = json_structure['_id']
 
         return search_process
 
