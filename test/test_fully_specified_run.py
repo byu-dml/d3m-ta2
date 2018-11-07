@@ -32,8 +32,8 @@ class TestFullySpecifiedRun:
 
         assert isinstance(response, core_pb2.SearchSolutionsResponse), 'call to SearchSolutions with fully specified pipeline did not return an instance of SearchSolutionsResponse'
 
-
     @staticmethod
+    @pytest.mark.skip(reason="We don't have this feature implemented yet")
     def test_fully_specified_pipeline_run(fully_specified_search_id: str):
         assert False
         assert isinstance(fully_specified_search_id, str)
