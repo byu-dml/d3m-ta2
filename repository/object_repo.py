@@ -10,9 +10,9 @@ from search_solution import SearchSolution
 class ObjectRepo:
 
     def __init__(self):
-        self.client = pymongo.MongoClient('ta2-mongodb', 27017)
-        self.search_processes = self.client['search_processes']['search_processes']
-        self.search_solutions = self.client['search_solutions']['search_solutions']
+        self.client = None
+        self._search_processes = None
+        self._search_solutions = None
 
     def save_search_process(self, search_process: SearchProcess) -> typing.Union[SearchProcess, InsertOneResult]:
         json_structure = search_process.to_json_structure()
@@ -29,7 +29,6 @@ class ObjectRepo:
         result = self.search_processes.find_one({'search_id': search_id})
         if result is not None:
             search_process = SearchProcess.from_json_structure(result)
-        logging.debug(f'Loaded process {search_process.to_json_structure()}')
 
         return search_process
 
@@ -49,7 +48,6 @@ class ObjectRepo:
         if result is not None:
             search_solution = SearchSolution.from_json_structure(result)
 
-        logging.debug(f'Loaded solution {search_solution}')
         return search_solution
 
     def delete_search_process_and_solutions(self, search_id) -> DeleteResult:
@@ -64,6 +62,32 @@ class ObjectRepo:
     def get_all_solutions_for_search(self, search_id) -> typing.List[SearchSolution]:
         query = {'search_id': search_id}
         documents: Cursor = self.search_solutions.find(query)
-        search_solutions = [SearchSolution.from_json_structure(doc) for doc in documents]
+        search_solutions = []
+        if documents is not None:
+            search_solutions = [SearchSolution.from_json_structure(doc) for doc in documents]
 
         return search_solutions
+
+    def _initialize_client(self):
+        if self.client is None:
+            self.client = pymongo.MongoClient('ta2-mongodb', 27017)
+            self._search_processes = self.client['search_processes']['search_processes']
+            self._search_solutions = self.client['search_solutions']['search_solutions']
+
+    @property
+    def search_processes(self):
+        self._initialize_client()
+        return self._search_processes
+
+    @search_processes.setter
+    def search_processes(self, value):
+        self._search_processes = value
+
+    @property
+    def search_solutions(self):
+        self._initialize_client()
+        return self._search_solutions
+
+    @search_solutions.setter
+    def search_solutions(self, value):
+        self._search_solutions = value
