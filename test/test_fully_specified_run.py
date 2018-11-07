@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from generated_grpc import core_pb2, core_pb2_grpc, pipeline_pb2
 from d3m.metadata import pipeline as pipeline_module
