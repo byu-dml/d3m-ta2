@@ -6,6 +6,8 @@ from pymongo.collection import InsertOneResult, DeleteResult, Cursor
 from search_process import SearchProcess
 from search_solution import SearchSolution
 
+MONGO_HOST = 'ta2-mongodb'
+
 
 class ObjectRepo:
 
@@ -70,9 +72,9 @@ class ObjectRepo:
 
     def _initialize_client(self):
         if self.client is None:
-            self.client = pymongo.MongoClient('ta2-mongodb', 27017)
-            self._search_processes = self.client['search_processes']['search_processes']
-            self._search_solutions = self.client['search_solutions']['search_solutions']
+            self.client = pymongo.MongoClient(MONGO_HOST, 27017)
+            self._search_processes = self.client['ta2']['search_processes']
+            self._search_solutions = self.client['ta2']['search_solutions']
 
     @property
     def search_processes(self):
