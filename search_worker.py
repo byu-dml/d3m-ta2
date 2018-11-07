@@ -1,26 +1,20 @@
 import multiprocessing
 import logging
-import queue
 import time
-import typing
-import uuid
 
 from repository.object_repo import ObjectRepo
 from search_process import SearchProcess
 from search_solution import SearchSolution
-from d3m.metadata import pipeline as pipeline_module
 
 
 class SearchWorker(multiprocessing.Process):
     def __init__(self,
                  search_queue: multiprocessing.Queue,
-                 # search_processes: typing.Dict[str, SearchProcess],
                  name: str):
         super(SearchWorker, self).__init__(name=name)
         self.search_queue = search_queue
         self.search_process: SearchProcess = None
         self.interrupted: bool = False
-        # self.search_processes: typing.Dict[str, SearchProcess] = search_processes
         self.db = ObjectRepo()
 
     def interrupt(self) -> None:
@@ -53,11 +47,10 @@ class SearchWorker(multiprocessing.Process):
             logging.debug(f'Adding solution {search_solution.id_}')
             search_solution.start_running()
             self._update_search_solution(search_solution)
-            time.sleep(3)
+            time.sleep(1)
             search_solution.complete(pipeline=None)
             self._update_search_solution(search_solution)
             self.search_process = self.db.get_search_process(self.search_process.search_id)
-            self.search_process.add_search_solution(search_solution)
             self._update_search_process()
 
         logging.info(f'Finished search {self.search_process.search_id}')

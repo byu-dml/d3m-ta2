@@ -45,13 +45,10 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_workers: typing.List[SearchWorker] = []
         self.has_loaded_primitives = False
         self.db = ObjectRepo()
-        # sp = SearchProcess(str(uuid.uuid4()), "")
-        # self.client.set(sp.search_id, sp)
 
         for i in range(num_workers):
             worker_thread = SearchWorker(
                 search_queue=self.work_queue,
-                #                          search_processes=self.search_processes,
                 name=f'worker {i}')
             self.search_workers.append(worker_thread)
             worker_thread.start()
@@ -95,8 +92,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
         self.search_processes.append(search_process.search_id)
         if not search_process.should_stop:
             self.work_queue.put(search_process)
-        # self.search_processes[search_process.search_id] = search_process.search_id
-        # self.search_processes[search_process.search_id] = search_process
 
     def find_search_solution(self, solution_id: str) -> typing.Optional[SearchSolution]:
         return self.db.get_search_solution(solution_id)
@@ -126,7 +121,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             search_solution = SearchSolution(search_id)
             search_solution.complete(pipeline)
             self.db.save_search_solution(search_solution)
-            search_process.add_search_solution(search_solution)
         else:
             if search_solutions_request.time_bound > 0:
                 timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
