@@ -1,16 +1,17 @@
 sudo: required
 language: python
-
 services:
-  - docker
-
-before_install: 
-  - sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  - sudo chmod +x /usr/local/bin/docker-compose
-  - sudo docker-compose -f docker-compose-travis.yml up -d
-
+- docker
+before_install:
+- sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname
+  -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+- sudo chmod +x /usr/local/bin/docker-compose
+- sudo docker login -u "$DOCKER_USERNAME" registry.datadrivendiscovery.org --password-stdin
+- sudo docker-compose -f docker-compose-travis.yml up -d
 script:
-  - sudo docker-exec ta2 python ta2_server.py &
-  - sudo docker-exec ta2 pytest -n 4
-
-
+- sudo docker-exec ta2 python ta2_server.py &
+- sudo docker-exec ta2 pytest -n 4
+env:
+  matrix:
+  - secure: u3UrnMesMEJI1xV3ZDsquNbIJpJDQwzMhTVTq18OyH1fzN9SkEPMYSMpxL57EVU1NDGCY4N5WcuSsoIcfQ7H2y1/nzTMSSKPqL/0uw+yJURr7fTy1BYC6IEr7ko6ZkXouv1XzTRIeXNiyj+FomutUrW2tcm2qyv+WkUKowrO3dYHH7J2epFrlBrRFE5TGr2rVXhvIIXDPvhu4WKGF9/tssl3pqUx6afXRTEgYfzWnyIBeFYpIZhTY7zhR/SWbKcHdCehimSU1G5D4WMCznv4/nOx5/EXl0CEaijQhy9Bz47CvVYNL6BvAyxHtYOsoFz2wLl3SoMaHCfUdiLU8p/ITztcBt3+wvGWtRKkyfEIiQfdLdwZ1UV+R5LlPqUiHSj0PCHf0WzQad/N4ssJiJkAzpNv887FHUMtxbRNGbKuhmYWvl/wMgkgOsZOEnm43CsX6B6yVtyfFhi0rKh3IkPant6EhZBh80qNBFv1IPjp6x2qdMN3cYy+8w/sXEk+NOUKa+CmzpGucIKMZdGroLSEGbn+2FkrgFIKR7rPv9+EsLlekBVSr/jOQDGYo6c+VIOQ1lUP9fFukNREEe5Kex0puyME3jgVn4DKQzRyupvUn17ZiT6iu5rb1sBYcrZh7LOAasfnIr/XFZEEuD7jak1pV9k379ADgzYMLmS/BpkKNrE=
+  - secure: qdYmObb6ROGbMdDYr/13xUlAL4ztBMXzMg5UV23usWfA8XCwF8BwTpI+lxehHWRbUpKeRRCTSQWxBkDb0VQ7Pp3yWJF87OaoOvw3Zl10trrkSkyBqLDNQkY7CC0+dDO7APamYcuWBgYx47FUsb8RAdYIh0f0fbPgsPOwlz37nN826utL9yYc6dq3tDzxJvpA/4o/kYiFAe65RjsbbBFrNzgQZ5Fu2PRnhG/HSC7ma9Q6+nIXqY5AUJlTIA4rePmUTNEd02GhxkZE1YqgLEK6HhvyI8IJxc4Eu9WYbltHeGL1U16BpAgODvvmWn9TN+xbnh/3tLMDt4YwrdD1TOynW2ItJx9DR6mH6J1zZ4IztU6lLwBy/EReNHHTNNaCv7gw5YDdgBqf1H1imlbbeCX+W84k5YkoadxseisN6XBEpARQJvgfCBxVIVYdvngkSXe3mdlSK+geBxoBo4Sa5qPHBPiGl1Jc9SmoXiHuxR3HyjYeRRK1pN53i7MMugvKU90RNY48GDodFV+vWuk306BS0Woci40/QJNfKo7vverYfn4KqUqLEvvbNM82DqCU/q35s7R0gu2xXHOosHJnjvcSxqENBATdot0WMZHbEAO2fzx7MS0q2L+26RWGkxXR/Qa9RAVHOsJhWThUlf3RB98bjTR0Fbs+O1Xahu1lqKnZmlk=
