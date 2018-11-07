@@ -6,7 +6,7 @@ before_install:
 - sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname
   -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 - sudo chmod +x /usr/local/bin/docker-compose
-- sudo docker login -u "$DOCKER_USERNAME" registry.datadrivendiscovery.org --password-stdin
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin registry.example.com registry.datadrivendiscovery.org --password-stdin
 - sudo docker-compose -f docker-compose-travis.yml up -d
 script:
 - sudo docker-exec ta2 python ta2_server.py &
