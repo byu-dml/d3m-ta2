@@ -1,7 +1,5 @@
 from util.timestamp_util import TimestampUtil
 from generated_grpc import core_pb2
-import datetime
-from dateutil.parser import parse
 
 
 UNKNOWN = 0

@@ -1,7 +1,7 @@
 import typing
 import logging
 import pymongo
-from pymongo.collection import InsertOneResult, DeleteResult, Cursor
+from pymongo.collection import DeleteResult, Cursor, UpdateResult
 
 from search_process import SearchProcess
 from search_solution import SearchSolution
@@ -12,12 +12,13 @@ MONGO_HOST = 'ta2-mongodb'
 class ObjectRepo:
 
     def __init__(self):
-        self.client = None
+        self._client = None
         self._search_processes = None
         self._search_solutions = None
 
-    def save_search_process(self, search_process: SearchProcess) -> typing.Union[SearchProcess, InsertOneResult]:
+    def save_search_process(self, search_process: SearchProcess) -> typing.Union[SearchProcess, UpdateResult]:
         json_structure = search_process.to_json_structure()
+
         if search_process.mongo_id is not None:
             query = {'_id': search_process.mongo_id}
             result = self.search_processes.replace_one(query, json_structure, upsert=True)
@@ -27,6 +28,7 @@ class ObjectRepo:
         return result
 
     def get_search_process(self, search_id) -> typing.Optional[SearchProcess]:
+
         search_process = None
         result = self.search_processes.find_one({'search_id': search_id})
         if result is not None:
@@ -34,7 +36,7 @@ class ObjectRepo:
 
         return search_process
 
-    def save_search_solution(self, search_solution: SearchSolution) -> typing.Union[SearchSolution, InsertOneResult]:
+    def save_search_solution(self, search_solution: SearchSolution) -> typing.Union[SearchSolution, UpdateResult]:
         json_structure = search_solution.to_json_structure()
         if search_solution.mongo_id is not None:
             query = {'_id': search_solution.mongo_id}
@@ -71,10 +73,10 @@ class ObjectRepo:
         return search_solutions
 
     def _initialize_client(self):
-        if self.client is None:
-            self.client = pymongo.MongoClient(MONGO_HOST, 27017)
-            self._search_processes = self.client['ta2']['search_processes']
-            self._search_solutions = self.client['ta2']['search_solutions']
+        if self._client is None:
+            self._client = pymongo.MongoClient(MONGO_HOST, 27017)
+            self._search_processes = self._client['ta2']['search_processes']
+            self._search_solutions = self._client['ta2']['search_solutions']
 
     @property
     def search_processes(self):

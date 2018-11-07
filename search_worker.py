@@ -22,9 +22,9 @@ class SearchWorker(multiprocessing.Process):
         self.interrupted = True
 
     def should_stop_searching(self) -> bool:
+        self._get_latest_search_process()
         if self.search_process is None:
             return True
-        self.search_process = self.db.get_search_process(self.search_process.search_id)
         return self.search_process is not None and (self.search_process.should_stop or self.interrupted)
 
     def _update_search_solution(self, search_solution: SearchSolution) -> None:
@@ -38,6 +38,7 @@ class SearchWorker(multiprocessing.Process):
             logging.warning("Tried to search with no search process")
             return
 
+        self._start_search()
         logging.info(f'Starting search {self.search_process.search_id}')
         for i in range(3):
             if self.should_stop_searching():
@@ -50,11 +51,16 @@ class SearchWorker(multiprocessing.Process):
             time.sleep(1)
             search_solution.complete(pipeline=None)
             self._update_search_solution(search_solution)
-            self.search_process = self.db.get_search_process(self.search_process.search_id)
-            self._update_search_process()
 
         logging.info(f'Finished search {self.search_process.search_id}')
         self._mark_search_complete()
+
+    def _start_search(self):
+        self._get_latest_search_process()
+        self.search_process.start()
+
+        self._update_search_process()
+        self._get_latest_search_process()
 
     def stop_search(self, search_id: str) -> None:
         if self.search_process is not None and self.search_process.search_id == search_id:
@@ -75,9 +81,14 @@ class SearchWorker(multiprocessing.Process):
             logging.warning('No search process to mark complete')
             return
 
-        self.search_process.completed = True
+        self._get_latest_search_process()
+        self.search_process.complete()
         self._update_search_process()
         self.search_process = None
+
+    def _get_latest_search_process(self):
+        if self.search_process is not None:
+            self.search_process = self.db.get_search_process(self.search_process.search_id)
 
     def run(self):
         logging.debug(f'Started {self.name}')
@@ -86,7 +97,8 @@ class SearchWorker(multiprocessing.Process):
                 self.search_process: SearchProcess = self.search_queue.get()
                 logging.debug(f'Grabbed search {self.search_process.search_id}')
                 if self.should_stop_searching():
-                    logging.debug(f'Grabbed stopped search process {self.search_process.search_id}')
+                    if self.search_process is not None:
+                        logging.debug(f'Grabbed stopped search process {self.search_process.search_id}')
                     self.search_process = None
                 else:
                     self.search()

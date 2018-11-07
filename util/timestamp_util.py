@@ -17,8 +17,12 @@ class TimestampUtil:
 
     @staticmethod
     def get_current_proto_timestamp() -> Timestamp:
-        return Timestamp()
+        timestamp = Timestamp()
+        timestamp.GetCurrentTime()
+        return timestamp
 
     @staticmethod
     def from_string(string) -> Timestamp:
-        return Timestamp().FromJsonString(string)
+        timestamp = Timestamp()
+        timestamp.FromJsonString(string)
+        return timestamp

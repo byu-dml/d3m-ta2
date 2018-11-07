@@ -1,5 +1,6 @@
 import typing
 import uuid
+import logging
 from wrapper.core.progress import Progress
 
 
@@ -26,6 +27,13 @@ class SearchProcess(object):
         if self.mongo_id is not None:
             json_structure['_id'] = self.mongo_id
         return json_structure
+
+    def complete(self):
+        self.completed = True
+        self.progress.complete()
+
+    def start(self):
+        self.progress.start_running()
 
     @staticmethod
     def from_json_structure(json_structure):
