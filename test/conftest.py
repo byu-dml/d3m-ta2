@@ -4,7 +4,12 @@ import generated_grpc.problem_pb2 as grpc_problem
 from generated_grpc import core_pb2_grpc, core_pb2
 from d3m import runtime
 from d3m.metadata import pipeline as pipeline_module
-from config import Config
+
+try:
+    from config import Config
+except ImportError:
+    from default_config import Config
+
 from wrapper.problem.problem_description import ProblemDescription
 import typing
 import ta2_server

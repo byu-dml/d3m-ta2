@@ -1,5 +1,7 @@
 import pytest
 import generated_grpc.problem_pb2 as grpc_problem
+import time
+
 from generated_grpc import core_pb2, core_pb2_grpc
 
 
@@ -56,6 +58,7 @@ class TestSearchSolutions:
                                                             problem=sick_problem,
                                                             time_bound=.01
                                                             )
+        time.sleep(1)
         response = stub.SearchSolutions(solutions_request)
         search_id = response.search_id
         get_search_solutions_request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)

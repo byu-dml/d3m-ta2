@@ -2,7 +2,10 @@ import grpc
 import unittest
 from generated_grpc import core_pb2_grpc, core_pb2
 import constants
-from config import Config
+try:
+    from config import Config
+except ImportError:
+    from default_config import Config
 
 
 class TestIncorrectParams(unittest.TestCase):

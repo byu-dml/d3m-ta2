@@ -9,12 +9,16 @@ import sys
 import logging
 import queue
 import threading
-
 from concurrent import futures
 from generated_grpc import core_pb2_grpc, core_pb2, pipeline_pb2
 from repository.object_repo import ObjectRepo
 from search_process import SearchProcess
-from config import Config
+
+try:
+    from config import Config
+except ImportError:
+    from default_config import Config
+
 import wrapper.core.search_solutions_request as search_solutions_wrapper
 from search_worker import SearchWorker
 from search_solution import SearchSolution
@@ -125,7 +129,6 @@ class CoreSession(core_pb2_grpc.CoreServicer):
             if search_solutions_request.time_bound > 0:
                 timer = threading.Timer(search_solutions_request.time_bound, self.stop_search, [search_id])
                 timer.start()
-        logging.debug("ADDING SEARCH PROCESS")
         self.add_search_process(search_process)
         return search_id
 
