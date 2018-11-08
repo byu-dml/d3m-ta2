@@ -58,7 +58,7 @@ class TestSearchSolutions:
                                                             problem=sick_problem,
                                                             time_bound=.01
                                                             )
-        time.sleep(1)
+        time.sleep(3)
         response = stub.SearchSolutions(solutions_request)
         search_id = response.search_id
         get_search_solutions_request = core_pb2.GetSearchSolutionsResultsRequest(search_id=search_id)

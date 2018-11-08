@@ -71,10 +71,11 @@ class SearchWorker(multiprocessing.Process):
             self.db.save_search_process(self.search_process)
 
     def _remove_search_process(self) -> None:
-        logging.info(f'Search {self.search_process.search_id} interrupted')
-        self.search_process.should_stop = True
-        self._update_search_process()
-        self.search_process = None
+        if self.search_process is not None:
+            logging.info(f'Search {self.search_process.search_id} interrupted')
+            self.search_process.should_stop = True
+            self._update_search_process()
+            self.search_process = None
 
     def _mark_search_complete(self) -> None:
         if self.search_process is None:
